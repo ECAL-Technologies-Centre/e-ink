@@ -20,7 +20,7 @@ input[type=text]::-webkit-outer-spin-button {
 
 @font-face {
     font-family: "pixelfont";
-    src: url("pixelfont.ttf");
+    src: url("https://rawcdn.githack.com/ECAL-Technologies-Centre/e-ink/fe0b0555cea3f1b4ef5bd803d1e186b6b84f6dbf/libraries/clock/rsrc/pixelfont.ttf");
 }
 
 html,
