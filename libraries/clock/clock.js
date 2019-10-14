@@ -7,7 +7,7 @@ const Clock = (function() {
     const o = {
             date: new Date(),
             trueTime: false,
-            fontSrc: 'rsrc/font.png'
+            fontSrc: 'https://raw.githubusercontent.com/ECAL-Technologies-Centre/e-ink/master/libraries/clock/rsrc/font.png'
         },
         dom = {};
 
