@@ -82,7 +82,9 @@ const Ink = {
 
         this._pause();
 
-        this.message('capture', { dataURI: drawingContext.canvas.toDataURL('image/png'), options: this.options });
+        let context = this.drawingContext || drawingContext;
+
+        this.message('capture', { dataURI: context.canvas.toDataURL('image/png'), options: this.options });
     },
 
     setOptions(options = {}) {

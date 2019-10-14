@@ -1,41 +1,19 @@
-let cv, ctx, frameRate = 1, interval;
-
 function setup() {
-
+    
     Clock.init({ date: new Date(), trueTime: false }); //date: start time, trueTime: if false, the time is only updated by Clock.tick();
 
     const inkOptions = {
         dither: 'bayer', //dithering: 'bayer', 'none', 'floyd-steinberg'
         invert: false, //invert frame: removes ghosting
-        dimensions: [2560, 1440], //portrait orientation: [1440, 2560]
-        loop: loop,
-        noLoop: noLoop,
+        dimensions: [2560, 1440] //portrait orientation: [1440, 2560] 
     }
     
     Ink.connect({ id: 'jean', options: inkOptions}); //connect to eInk via a server to display image
 
-    cv = createCanvas(...inkOptions.dimensions);
-    ctx = cv.getContext('2d');
-
-    loop();
-}
-
-function createCanvas(width, height) {
-    let canvas = document.createElement('canvas');
-    document.body.appendChild(canvas);
-    canvas.width = width;
-    canvas.height = height;
-
-    return canvas;
-}
-
-function loop() {
-    draw();
-    interval = setInterval(draw, 1000/frameRate);
-}
-
-function noLoop() {
-    clearInterval(interval);
+    createCanvas(...inkOptions.dimensions);
+    pixelDensity(1);
+    frameRate(1);
+    background(0);
 }
 
 function draw() {
@@ -44,7 +22,7 @@ function draw() {
 
     Clock.tick(); //updates clock when trueTime is set to false
     Clock.display({ scale: 1, black: true }); //display time on top left of canvas    
-    Ink.capture(ctx); //send screenshot of canvas to eInk
+    Ink.capture(); //send screenshot of canvas to eInk
 
     console.log(Clock.getSeconds());
 }

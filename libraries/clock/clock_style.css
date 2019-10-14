@@ -49,6 +49,7 @@ canvas {
     top: 0;
     transition: 0.5s opacity;
     width: 100%;
+    z-index: 1000;
 }
 
 .clock.hidden {
