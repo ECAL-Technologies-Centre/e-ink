@@ -1,5 +1,6 @@
 let cv, ctx, frameRate = 1, interval;
 
+window.addEventListener('load', setup);
 function setup() {
 
     Clock.init({ date: new Date(), trueTime: false }); //date: start time, trueTime: if false, the time is only updated by Clock.tick();
@@ -43,8 +44,8 @@ function draw() {
     /*YOUR SKETCH*/
 
     Clock.tick(); //updates clock when trueTime is set to false
-    Clock.display({ scale: 1, black: true }); //display time on top left of canvas    
-    Ink.capture(ctx); //send screenshot of canvas to eInk
+    Clock.display({ scale: 1, black: true, context: ctx}); //display time on top left of canvas    
+    Ink.capture({context: ctx}); //send screenshot of canvas to eInk
 
     console.log(Clock.getSeconds());
 }

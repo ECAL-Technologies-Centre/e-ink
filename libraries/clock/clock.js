@@ -191,7 +191,7 @@ const Clock = (function() {
 
                 const o = {
                     black: false,
-                    context: drawingContext,
+                    context: window.drawingContext,
                     scale: 2
                 }
 
