@@ -133,6 +133,7 @@ const Clock = (function() {
 
         fontImg: (function() {
             let img = new Image();
+            img.crossOrigin = 'anonymous';
             img.src = o.fontSrc;
             return img
         })(),
