@@ -21,7 +21,8 @@
 
 #### Changing the time
 1. Click anywhere on the canvas. A popup will show the current time.
-2. Click on any of the digits `00:00:00`. Hours, minutes and seconds are changed indepedently. You can also drag them for fast incrementation.
+2. Click on any digits of `00:00:00`. Hours, minutes and seconds are changed indepedently. You can also drag them for fast incrementation.
+3. Click outside the digits to close the popup.
 
 
 ------------
@@ -116,7 +117,7 @@ Function called to pause the drawing of your htmlCanvas.\
 
 ### Methods
 
-###### Ink.connect( {object} )
+###### Ink.connect( Object )
 Initialize connection to the *Visionect Sketch Selector*. Should be called once. You can pass any Ink properties listed above to overwrite the default values.\
 Example:
 ```javascript
@@ -162,20 +163,20 @@ Will be called on each hours.
 Clock inherits every [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date "methods") of the `Date` object.\
 Examples: `Clock.getMinutes()`,` Clock.setHours()`, `Clock.setTime()`, etc.
 
-###### Clock.init({ object })
+###### Clock.init( Object )
 Initializes the Clock. You can pass a `Date` object to set the start time.\
 Example:
 ```javascript
 Clock.init({ date: new Date(), trueTime: false });
 ```
-###### Clock.tick( int )
+###### Clock.tick( Int )
 Updates the time of Clock by incrementing it with a value in milliseconds.\
 Default value is `1000` (milliseconds). Only works if `Clock.trueTime` is set to false.\
 Example:
 ```javascript
 Clock.tick(2000); //will add 2 seconds to the time.
 ```
-###### Clock.display({ object })
+###### Clock.display( Object )
 Draws a small clock on the top left of your htmlCanvas.\
 Default color is set to black, default scale is 1.\
 Example:
