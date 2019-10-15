@@ -139,8 +139,8 @@ Will be called on each hours.
 
 
 #### Methods
-Clock inherits every [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date "methods") of the `Date` object.
-Examples: `Clock.getMinutes()`,` Clock.setHours()`, `Clock.setTime()`, etc.
+######Inherited methods
+Clock inherits every [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date "methods") of the `Date` object. Examples: `Clock.getMinutes()`,` Clock.setHours()`, `Clock.setTime()`, etc.
 ######Clock.init({ object })
 Initializes the Clock. You can pass a `Date` object to set the start time.
 ######Clock.tick( int )
