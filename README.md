@@ -143,7 +143,7 @@ Clock is an object built on top of the `Date` object. Clock keeps updating the `
 **false**: Default value. You have to manually update the Clock using the `Clock.tick()` method.\
 **true**: Clock will always be set to the clock of your computer. It will be updated when you call any of the Clock methods.
 
-###### Clock.onMinuteChange: `Function`
+###### Clock.onMinuteChange `Function`
 Will be called on each minutes.\
 Example:
 ```javascript
