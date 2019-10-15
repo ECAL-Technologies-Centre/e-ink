@@ -124,7 +124,7 @@ Example:
 ```javascript
 Ink.connect({
 	id: 'jean',
-		options: {
+	options: {
 		dither: 'bayer',
 		invert: false,
 		dimensions: [2560, 1440]
