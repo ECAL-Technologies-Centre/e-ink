@@ -1,5 +1,5 @@
-#e-ink
-##Getting Started
+# e-ink
+## Getting Started
 #### Running a sketch on the Visionect Display
 1. Download one of the example folders of the repository:
 	- **empty_p5**: Ready to be used with p5.js.
@@ -139,14 +139,14 @@ Will be called on each hours.
 
 
 #### Methods
-######Inherited methods
+###### Inherited methods
 Clock inherits every [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date "methods") of the `Date` object. Examples: `Clock.getMinutes()`,` Clock.setHours()`, `Clock.setTime()`, etc.
-######Clock.init({ object })
+###### Clock.init({ object })
 Initializes the Clock. You can pass a `Date` object to set the start time.
-######Clock.tick( int )
+###### Clock.tick( int )
 Updates the time of Clock by incrementing it with a value in milliseconds.
 Default value is `1000` (milliseconds). Only works if `Clock.trueTime` is set to false.
-######Clock.display({ object })
+###### Clock.display({ object })
 Draws a small clock on the top left of your htmlCanvas. Default color is set to black, default scale is 1. Example:
 ```javascript
 Clock.display({
