@@ -45,7 +45,7 @@ function draw() {
     ellipse(x, y, 220);
 
     Clock.tick(); //updates clock when trueTime is set to false
-    Clock.display({ scale: 2, black: true }); //display time on top left of canvas
+    Clock.display({ scale: 1, black: true }); //display time on top left of canvas
     Ink.capture(); //send screenshot of canvas to eInk
 
     console.log(Clock.getSeconds());
