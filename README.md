@@ -48,6 +48,7 @@ Ask Sébatien Matos or Tibor Udvari for additionnal help.
 ##Ink.js
 Ink is an object that sends the frames of your htmlCanvas to the Visionect Sketch Selector.
 
+
 ------------
 
 
@@ -93,6 +94,7 @@ Function called to resume the drawing of your htmlCanvas.
 Function called to pause the drawing of your htmlCanvas.
 **() => noLoop()**: Default value. Calls the noLoop function of p5.js.
 
+
 ------------
 
 
@@ -116,7 +118,10 @@ Ink.connect({
 ##Clock.js
 Clock is an object built on top of the `Date` object. Clock keeps updating the `Date` object constantly.
 
+
 ------------
+
+
 #### Properties
 ###### Clock.trueTime `Boolean`
 **false**: Default value. You have to manually update the Clock using the `Clock.tick()` method.
@@ -127,6 +132,7 @@ Will be called on each minutes.
 Will be called on each seconds.
 ###### Clock.onHourChange: `function`
 Will be called on each hours.
+
 
 ------------
 
