@@ -151,10 +151,10 @@ Clock.onSecondChange = function(value) {
   console.log('New second: ' + value);
 }
 ```
-###### Clock.onSecondChange: `Function`
+###### Clock.onSecondChange `Function`
 Will be called on each seconds.
 
-###### Clock.onHourChange: `Function`
+###### Clock.onHourChange `Function`
 Will be called on each hours.
 
 ### Methods
