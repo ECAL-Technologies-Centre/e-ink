@@ -23,13 +23,17 @@
 1. Click anywhere on the canvas. A popup will show the current time.
 2. Click on any of the digits `00:00:00`. Hours, minutes and seconds are changed indepedently. You can also drag them for fast incrementation.
 
-#### Troubleshoot
-###### Cannot connect to ct-zotac-2
+
+------------
+
+
+## Troubleshoot
+#### Cannot connect to ct-zotac-2
 1. Make sure the PC zotac-2 is ON.
 2. Go to *Settings  > Network & Internet > Mobile hotspot.*
 3. Switch it on.
 
-###### Connection error in the console.log of your sketch
+#### Connection error in the console.log of your sketch
 1. Open [localhost:3000](http://localhost:3000 "localhost:3000") on zotac-2.
 2. If it doesn't work. You need to run the latest version of the Visionect Sketch Selector on zotac-2:
 	1. Download the folder server of this repository.
@@ -39,13 +43,13 @@
 	5. Done. Confirm by going to [localhost:3000](http://localhost:3000 "localhost:3000").
 3. Make sure only one Visionect Sketch Selector is running at the same time.
 
-###### Error connecting to the Visionect Display.
+#### Error connecting to the Visionect Display.
 1. Make sure the wifi ct-zotac-2 is on.
 2. The display might be sleeping. Connect a USB-C to USB-A cable to the right port of the display. Plug it on a phone charger. You should hear a small bip noise.
 3. From the PC zotac-2. Go to [localhost:8081](http://localhost:8081 "localhost:8081") on a browser.
 4. You should be connected to the Visionect Server. One device should be online.
 
-###### Still having WTF issues.
+#### Still having WTF issues.
 Ask Sébatien Matos or Tibor Udvari for additionnal help.
 
 
