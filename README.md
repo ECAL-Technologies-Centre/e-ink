@@ -10,7 +10,7 @@
 2. Connect to the WiFi **ct-zotac-2**. Password: **ecalecal**.
 3. Run your example folder on a [localhost](https://flaviocopes.com/local-web-server/ "localhost").
 4. ???
-5. Profit & C O D E
+5. Profit.
 
 #### Running multiple sketches with the *Visionect Sketch Selector*
 1. Use the PC **zotac-2**. Open [localhost:3000](http://localhost:3000) on Chrome.
