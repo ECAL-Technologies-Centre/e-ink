@@ -17,7 +17,7 @@
 2. Select the sketch you want to display on the e-paper.
 
 #### Running the sketch offline
-1. You don't have to change anything, you can still run your sketch even if the display is not connected.
+1. Comment out the line `Ink.connect...`.
 
 #### Changing the time
 1. Click anywhere on the canvas. A popup will show the current time.

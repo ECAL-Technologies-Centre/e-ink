@@ -12,7 +12,7 @@ function setup() {
         loop: loop,
         noLoop: noLoop,
     }
-    
+
     Ink.connect({ id: 'jean', options: inkOptions}); //connect to eInk via a server to display image
 
     cv = createCanvas(...inkOptions.dimensions);

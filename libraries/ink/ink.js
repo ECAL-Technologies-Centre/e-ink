@@ -57,6 +57,8 @@ const Ink = {
 
         this.socket.onerror = e => {
             //this._pause();
+            this.socket = undefined;
+            
             console.error('Cannot connect to server!');
         }
     },
