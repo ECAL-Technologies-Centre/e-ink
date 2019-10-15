@@ -39,7 +39,7 @@
 1. Open [localhost:3000](http://localhost:3000 "localhost:3000") on zotac-2.
 2. If it doesn't work. You need to run the latest version of the Visionect Sketch Selector on zotac-2:
 	1. Download the folder server of this repository.
-	2. Navigate to the downloaded folder using the Command Prompt. Write `cd: path_to_folder`). Press Enter.
+	2. Navigate to the downloaded folder using the Command Prompt. Write `cd "path/to/folder"`). Press Enter.
 	3. Write `npm install`. Press Enter. Wait.
 	4. Write `node server.js`. Press Enter.
 	5. Done. Confirm by going to [localhost:3000](http://localhost:3000 "localhost:3000").
