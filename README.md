@@ -123,8 +123,8 @@ Example:
 Ink.connect({
   id: 'jean',
   options: {
-	dither: 'bayer',
-	invert: false,
+    dither: 'bayer',
+    invert: false,
     dimensions: [2560, 1440]
   }
 });
