@@ -15,7 +15,11 @@
 2. Select the sketch you want to display on the e-paper.
 
 #### Running the sketch offline
-1. Yes you can.
+1. You don't have to change anything, you can still run your sketch even if the display is not connected.
+
+#### Changing the time
+1. Click anywhere on the canvas. A popup will show the current time.
+2. Click on any of the digits `00:00:00`. Hours, minutes and seconds are changed indepedently. You can also drag them to increment them faster.
 
 #### Troubleshoot
 ###### Cannot connect to ct-zotac-2
@@ -39,7 +43,7 @@
 3. From the PC zotac-2. Go to [localhost:8081](http://localhost:8081) on a browser.
 4. You should be connected to the Visionect Server. One device should be online.
 
-###### Still have wtf issues.
+###### Still having WTF issues.
 Ask Sébatien Matos or Tibor Udvari for additionnal help.
 
 
@@ -116,7 +120,13 @@ Clock is an object built on top of the `Date` object. Clock keeps updating the `
 **false**: Default value. You have to manually update the Clock using the `Clock.tick()` method.
 **true**: Clock will always be set to the clock of your computer. It will be updated when you call any of the Clock methods.
 ###### Clock.onMinuteChange: `function`
-Will be called on each minutes.
+Will be called on each minutes.\
+Example:
+```javascript
+Clock.onSecondChange = function(value) {
+	console.log('New second: ' + value);
+};
+```
 ###### Clock.onSecondChange: `function`
 Will be called on each seconds.
 ###### Clock.onHourChange: `function`
@@ -126,12 +136,21 @@ Will be called on each hours.
 ###### Inherited methods
 Clock inherits every [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date "methods") of the `Date` object. Examples: `Clock.getMinutes()`,` Clock.setHours()`, `Clock.setTime()`, etc.
 ###### Clock.init({ object })
-Initializes the Clock. You can pass a `Date` object to set the start time.
+Initializes the Clock. You can pass a `Date` object to set the start time.\
+Example:
+```javascript
+Clock.init({ date: new Date(), trueTime: false });
+```
 ###### Clock.tick( int )
 Updates the time of Clock by incrementing it with a value in milliseconds.
-Default value is `1000` (milliseconds). Only works if `Clock.trueTime` is set to false.
+Default value is `1000` (milliseconds). Only works if `Clock.trueTime` is set to false.\
+Example:
+```javascript
+Clock.tick(2000); //will add 2 seconds to the time.
+```
 ###### Clock.display({ object })
-Draws a small clock on the top left of your htmlCanvas. Default color is set to black, default scale is 1. Example:
+Draws a small clock on the top left of your htmlCanvas. Default color is set to black, default scale is 1.\
+Example:
 ```javascript
 Clock.display({
 	scale: 1,
