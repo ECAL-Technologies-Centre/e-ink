@@ -8,9 +8,10 @@
 	- **empty**: Ready to be used with vanilla htmlCanvas or other canvas libraries.
 	- **ball**: Simple example running on p5.js.
 2. Connect to the WiFi **ct-zotac-2**. Password: **ecalecal**.
-3. Run your example folder on a [localhost](https://flaviocopes.com/local-web-server/ "localhost").
-4. ???
-5. Profit.
+3. Uncomment the line `Ink.connect ...` in the **sketch.js** file.
+4. Run your example folder on a [localhost](https://flaviocopes.com/local-web-server/ "localhost").
+5. ???
+6. Profit.
 
 #### Running multiple sketches with the *Visionect Sketch Selector*
 1. Use the PC **zotac-2**. Open [localhost:3000](http://localhost:3000) on Chrome.
@@ -45,7 +46,7 @@
 	5. Done. Confirm by going to [localhost:3000](http://localhost:3000 "localhost:3000").
 3. Make sure only one Visionect Sketch Selector is running at the same time.
 
-#### Error connecting to the Visionect Display.
+#### Still cannot connect to the Visionect Display.
 1. Make sure the wifi ct-zotac-2 is on.
 2. The display might be sleeping. Connect a USB-C to USB-A cable to the right port of the display. Plug it on a phone charger. You should hear a small bip noise.
 3. From the PC zotac-2. Go to [localhost:8081](http://localhost:8081 "localhost:8081") on a browser.
