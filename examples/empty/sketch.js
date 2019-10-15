@@ -44,7 +44,7 @@ function draw() {
     /*YOUR SKETCH*/
 
     Clock.tick(); //updates clock when trueTime is set to false
-    Clock.display({ scale: 1, black: true, context: ctx}); //display time on top left of canvas    
+    Clock.display({ scale: 1, black: true, context: ctx}); //display time on top left of canvas
     Ink.capture({context: ctx}); //send screenshot of canvas to eInk
 
     console.log(Clock.getSeconds());

@@ -4,7 +4,7 @@ const Ink = {
 
     //server
     id: 'anonymous', //default id/name
-    host: 'localhost',
+    host: '192.168.137.1',
     port: 3000,
 
     options: {
