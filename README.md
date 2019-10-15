@@ -1,7 +1,4 @@
 #e-ink
-
-!Under construction!
-
 ##Getting Started
 #### Running a sketch on the Visionect Display
 1. Download one of the example folders of the repository:
@@ -44,6 +41,10 @@
 
 ###### Still have wtf issues.
 Ask Sébatien Matos or Tibor Udvari for additionnal help.
+
+
+------------
+
 
 ##Ink.js
 Ink is an object that sends the frames of your htmlCanvas to the Visionect Sketch Selector.
@@ -140,7 +141,6 @@ Will be called on each hours.
 #### Methods
 Clock inherits every [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date "methods") of the `Date` object.
 Examples: `Clock.getMinutes()`,` Clock.setHours()`, `Clock.setTime()`, etc.
-
 ######Clock.init({ object })
 Initializes the Clock. You can pass a `Date` object to set the start time.
 ######Clock.tick( int )
