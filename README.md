@@ -121,11 +121,11 @@ Initialize connection to the *Visionect Sketch Selector*. Should be called once.
 Example:
 ```javascript
 Ink.connect({
-id: 'jean',
+  id: 'jean',
   options: {
 	dither: 'bayer',
 	invert: false,
-    dimensions: [2560, 1440]
+    dimensions: [2560, 1440]
   }
 });
 ```
@@ -148,7 +148,7 @@ Example:
 ```javascript
 Clock.onSecondChange = function(value) {
   console.log('New second: ' + value);
-};
+}
 ```
 ###### Clock.onSecondChange: `Function`
 Will be called on each seconds.
