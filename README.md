@@ -74,7 +74,7 @@ IP address of the server *Visionect Sketch Selector*.
 Port on which the server *Visionect Sketch Selector* is running.
 **3000**: Default value.
 
-###### Ink.options.dimensions `[Int, Int]`
+###### Ink.options.dimensions `[ Int, Int ]`
 Dimensions of the Visionect Display. This is also the size of your htmlCanvas.
 **[2560, 1440]**: Landscape mode. Default value.
 **[1440, 2560]**: Portrait mode.
@@ -116,17 +116,17 @@ Function called to pause the drawing of your htmlCanvas.
 
 ### Methods
 
-###### Ink.connect({object})
+###### Ink.connect( {object} )
 Initialize connection to the *Visionect Sketch Selector*. Should be called once. You can pass any Ink properties listed above to overwrite the default values.\
 Example:
 ```javascript
 Ink.connect({
-	id: 'jean',
-	options: {
-        dither: 'bayer',
-        invert: false,
-        dimensions: [2560, 1440]
-	}
+id: 'jean',
+  options: {
+	dither: 'bayer',
+	invert: false,
+    dimensions: [2560, 1440]
+  }
 });
 ```
 
@@ -147,7 +147,7 @@ Will be called on each minutes.\
 Example:
 ```javascript
 Clock.onSecondChange = function(value) {
-	console.log('New second: ' + value);
+  console.log('New second: ' + value);
 };
 ```
 ###### Clock.onSecondChange: `Function`
@@ -179,8 +179,8 @@ Draws a small clock on the top left of your htmlCanvas. Default color is set to 
 Example:
 ```javascript
 Clock.display({
-	scale: 1,
-	black: true,
-	context: ctx
+  scale: 1,
+  black: true,
+  context: ctx
 });
 ```
