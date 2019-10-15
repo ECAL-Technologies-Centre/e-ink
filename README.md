@@ -46,12 +46,8 @@ Ask Sébatien Matos or Tibor Udvari for additionnal help.
 ------------
 
 
-##Ink.js
+## Ink.js
 Ink is an object that sends the frames of your htmlCanvas to the Visionect Sketch Selector.
-
-
-------------
-
 
 #### Properties
 ######Ink.id `String`
@@ -116,12 +112,8 @@ Ink.connect({
 ------------
 
 
-##Clock.js
+## Clock.js
 Clock is an object built on top of the `Date` object. Clock keeps updating the `Date` object constantly.
-
-
-------------
-
 
 #### Properties
 ###### Clock.trueTime `Boolean`
@@ -133,10 +125,6 @@ Will be called on each minutes.
 Will be called on each seconds.
 ###### Clock.onHourChange: `function`
 Will be called on each hours.
-
-
-------------
-
 
 #### Methods
 ###### Inherited methods
