@@ -1,5 +1,7 @@
 # e-ink
+
 ## Getting Started
+
 #### Running a sketch on the Visionect Display
 1. Download one of the example folders of the repository:
 	- **empty_p5**: Ready to be used with p5.js.
@@ -19,7 +21,7 @@
 
 #### Changing the time
 1. Click anywhere on the canvas. A popup will show the current time.
-2. Click on any of the digits `00:00:00`. Hours, minutes and seconds are changed indepedently. You can also drag them to increment them faster.
+2. Click on any of the digits `00:00:00`. Hours, minutes and seconds are changed indepedently. You can also drag them for fast incrementation.
 
 #### Troubleshoot
 ###### Cannot connect to ct-zotac-2
@@ -40,7 +42,7 @@
 ###### Error connecting to the Visionect Display.
 1. Make sure the wifi ct-zotac-2 is on.
 2. The display might be sleeping. Connect a USB-C to USB-A cable to the right port of the display. Plug it on a phone charger. You should hear a small bip noise.
-3. From the PC zotac-2. Go to [localhost:8081](http://localhost:8081) on a browser.
+3. From the PC zotac-2. Go to [localhost:8081](http://localhost:8081 "localhost:8081") on a browser.
 4. You should be connected to the Visionect Server. One device should be online.
 
 ###### Still having WTF issues.
@@ -60,7 +62,7 @@ Name of your sketch displayed on the *Visionect Sketch Selector*.
 ###### Ink.host `String`
 IP address of the server *Visionect Sketch Selector*.
 **"192.168.137.1"**: Default value. To use if the server is running on the PC zotac-2)-
-######Ink.port `Int`
+###### Ink.port `Int`
 Port on which the server *Visionect Sketch Selector* is running.
 **3000**: Default value.
 ###### Ink.options.dimensions `[Int, Int]`
@@ -97,7 +99,8 @@ Function called to pause the drawing of your htmlCanvas.
 
 ### Methods
 ###### Ink.connect({object})
-Initialize connection to the *Visionect Sketch Selector*. Should be called once. You can pass any Ink properties listed above to overwrite the default values. Example:
+Initialize connection to the *Visionect Sketch Selector*. Should be called once. You can pass any Ink properties listed above to overwrite the default values.\
+Example:
 ```javascript
 Ink.connect({
 	id: 'jean',
