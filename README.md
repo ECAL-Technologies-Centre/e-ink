@@ -63,55 +63,55 @@ Ink is an object that sends the frames of your htmlCanvas to the Visionect Sketc
 ### Properties
 
 ###### Ink.id `String`
-Name of your sketch displayed on the *Visionect Sketch Selector*.
+Name of your sketch displayed on the *Visionect Sketch Selector*.\
 **"anonymous"**: Default value.
 
 ###### Ink.host `String`
-IP address of the server *Visionect Sketch Selector*.
+IP address of the server *Visionect Sketch Selector*.\
 **"192.168.137.1"**: Default value. To use if the server is running on the PC zotac-2.
 
 ###### Ink.port `Int`
-Port on which the server *Visionect Sketch Selector* is running.
+Port on which the server *Visionect Sketch Selector* is running.\
 **3000**: Default value.
 
 ###### Ink.options.dimensions `[ Int, Int ]`
-Dimensions of the Visionect Display. This is also the size of your htmlCanvas.
-**[2560, 1440]**: Landscape mode. Default value.
+Dimensions of the Visionect Display. This is also the size of your htmlCanvas.\
+**[2560, 1440]**: Landscape mode. Default value.\
 **[1440, 2560]**: Portrait mode.
 
 ###### Ink.options.dither `Int`
-Dithering used by the Visionect Display to draw different shades of gray using only black and white pixels.
-**"bayer"**: Ordered dithering. Default value.
-**"floyd-steinberg"**: Randomized dithering.
+Dithering used by the Visionect Display to draw different shades of gray using only black and white pixels.\
+**"bayer"**: Ordered dithering. Default value.\
+**"floyd-steinberg"**: Randomized dithering.\
 **"none"**: No dithering.
 
 ###### Ink.options.bit `Int`
-Pixel mode of the Visionect Display.
-**1**: 1-bit (black or white pixels). Default value.
+Pixel mode of the Visionect Display.\
+**1**: 1-bit (black or white pixels). Default value.\
 **4**: 4-bit (16 shades of gray). Inverts the screen of each frame to prevent ghosting.
 
 ###### Ink.options.invert `Boolean`
-Inverts the screen of each frame to prevent ghosting.
+Inverts the screen of each frame to prevent ghosting.\
 **false**: Default value.
 
 ###### Ink.options.optimize `Boolean`
-Renders a better image quality.
+Renders a better image quality.\
 **true**: Default value.
 
 ###### Ink.options.partial `Boolean`
-Can make only partial updates of the screen.
+Can make only partial updates of the screen.\
 **true**: Default value.
 
 ###### Ink.options.context `CanvasRenderingContext2D `
-2d context of your htmlCanvas.
+2d context of your htmlCanvas.\
 **drawingContext**: Context of p5.js by default.
 
 ###### Ink.options.loop `Function`
-Function called to resume the drawing of your htmlCanvas.
+Function called to resume the drawing of your htmlCanvas.\
 **() => loop()**: Default value. Calls the loop function of p5.js
 
 ###### Ink.options.noLoop `Function`
-Function called to pause the drawing of your htmlCanvas.
+Function called to pause the drawing of your htmlCanvas.\
 **() => noLoop()**: Default value. Calls the noLoop function of p5.js.
 
 ### Methods
@@ -139,7 +139,7 @@ Clock is an object built on top of the `Date` object. Clock keeps updating the `
 ### Properties
 
 ###### Clock.trueTime `Boolean`
-**false**: Default value. You have to manually update the Clock using the `Clock.tick()` method.
+**false**: Default value. You have to manually update the Clock using the `Clock.tick()` method.\
 **true**: Clock will always be set to the clock of your computer. It will be updated when you call any of the Clock methods.
 
 ###### Clock.onMinuteChange: `Function`
@@ -159,7 +159,8 @@ Will be called on each hours.
 ### Methods
 
 ###### Inherited methods
-Clock inherits every [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date "methods") of the `Date` object. Examples: `Clock.getMinutes()`,` Clock.setHours()`, `Clock.setTime()`, etc.
+Clock inherits every [methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date "methods") of the `Date` object.\
+Examples: `Clock.getMinutes()`,` Clock.setHours()`, `Clock.setTime()`, etc.
 
 ###### Clock.init({ object })
 Initializes the Clock. You can pass a `Date` object to set the start time.\
@@ -168,14 +169,15 @@ Example:
 Clock.init({ date: new Date(), trueTime: false });
 ```
 ###### Clock.tick( int )
-Updates the time of Clock by incrementing it with a value in milliseconds.
+Updates the time of Clock by incrementing it with a value in milliseconds.\
 Default value is `1000` (milliseconds). Only works if `Clock.trueTime` is set to false.\
 Example:
 ```javascript
 Clock.tick(2000); //will add 2 seconds to the time.
 ```
 ###### Clock.display({ object })
-Draws a small clock on the top left of your htmlCanvas. Default color is set to black, default scale is 1.\
+Draws a small clock on the top left of your htmlCanvas.\
+Default color is set to black, default scale is 1.\
 Example:
 ```javascript
 Clock.display({
