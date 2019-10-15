@@ -32,15 +32,15 @@
 ## Troubleshoot
 
 #### Cannot connect to ct-zotac-2
-1. Make sure the PC zotac-2 is ON.
+1. Make sure the PC Zotac-2 is ON. Zotac-2 is the second PC on the left row of the entry.
 2. Go to *Settings  > Network & Internet > Mobile hotspot.*
 3. Switch it on.
 
 #### Connection error in the console.log of your sketch
-1. Open [localhost:3000](http://localhost:3000 "localhost:3000") on zotac-2.
+1. Open [localhost:3000](http://localhost:3000 "localhost:3000") on Zotac-2.
 2. If it doesn't work. You need to run the latest version of the Visionect Sketch Selector on zotac-2:
 	1. Download the folder server of this repository.
-	2. Navigate to the downloaded folder using the Command Prompt. Write `cd "path/to/folder"`). Press Enter.
+	2. Navigate to the downloaded folder using the Command Prompt. Write `cd `+ the path to the folder). Press Enter.
 	3. Write `npm install`. Press Enter. Wait.
 	4. Write `node server.js`. Press Enter.
 	5. Done. Confirm by going to [localhost:3000](http://localhost:3000 "localhost:3000").
@@ -123,12 +123,12 @@ Initialize connection to the *Visionect Sketch Selector*. Should be called once.
 Example:
 ```javascript
 Ink.connect({
-  id: 'jean',
-  options: {
-    dither: 'bayer',
-    invert: false,
-    dimensions: [2560, 1440]
-  }
+	id: 'jean',
+		options: {
+		dither: 'bayer',
+		invert: false,
+		dimensions: [2560, 1440]
+	}
 });
 ```
 
@@ -149,7 +149,7 @@ Will be called on each minutes.\
 Example:
 ```javascript
 Clock.onSecondChange = function(value) {
-  console.log('New second: ' + value);
+	console.log('New second: ' + value);
 }
 ```
 ###### Clock.onMinuteChange `Function`
@@ -183,8 +183,8 @@ Default color is set to black, default scale is 1.\
 Example:
 ```javascript
 Clock.display({
-  scale: 1,
-  black: true,
-  context: ctx
+	scale: 1,
+	black: true,
+	context: ctx
 });
 ```
