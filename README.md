@@ -104,7 +104,7 @@ Renders a better image quality.\
 Can make only partial updates of the screen.\
 **true**: Default value.
 
-###### Ink.options.context `CanvasRenderingContext2D `
+###### Ink.options.context `CanvasRenderingContext2D `,`WebGLRenderingContext`
 2d context of your htmlCanvas.\
 **drawingContext**: Context of p5.js by default.
 
