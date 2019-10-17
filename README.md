@@ -131,6 +131,16 @@ Ink.connect({
 	}
 });
 ```
+###### Ink.capture( Object )
+Sends a screenshot of your canvas rendering context. You can also overwrite the e paper parameter with an object by passing them as the argument.
+Example:
+```javascript
+Ink.capture({
+	invert: true,
+	bit: 1
+});
+```
+
 
 ------------
 
