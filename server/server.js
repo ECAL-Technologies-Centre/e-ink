@@ -20,7 +20,7 @@ const WEBSOCKET = require('ws'),
 
 const SERVER = HTTP.createServer(function(req, res) {
 
-    FS.readFile('public/index.html', function(err, data) {
+    FS.readFile('gui/index.html', function(err, data) {
         res.writeHead(200, { 'Content-Type': 'text/html', 'Content-Length': data.length });
         res.write(data);
         res.end();

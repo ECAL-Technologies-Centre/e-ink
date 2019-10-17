@@ -1,6 +1,6 @@
 {
-  "name": "Visionect Sketch Selector",
-  "version": "0.1",
+  "name": "visionect_sketch_selector",
+  "version": "0.0.1",
   "description": "Select canvas sketches to display on a visionect display using websockets",
   "main": "server.js",
   "scripts": {
