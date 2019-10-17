@@ -10,7 +10,7 @@ function setup() {
 
     const inkOptions = {
         dither: 'bayer', //dithering: 'bayer', 'none', 'floyd-steinberg'
-        invert: true, //invert frame: removes ghosting
+        invert: false, //invert frame: removes ghosting
         dimensions: [2560, 1440] //portrait orientation: [1440, 2560] 
     }
 
