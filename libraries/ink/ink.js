@@ -80,6 +80,11 @@ const Ink = {
         if (!this.socket || this.idle)
             return;
 
+        //added anti spam security
+
+        if(frameRate in window && Math.round(frameRate()) !== 1)
+            frameRate(1);
+
         this.setOptions(options);
 
         this._pause();
