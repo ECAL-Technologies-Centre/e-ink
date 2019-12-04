@@ -89,7 +89,7 @@ const Ink = {
 
         this._pause();
 
-        let context = this.options.context || window.drawingContext;
+        let context = this.options.context || (window._renderer && window._renderer.drawingContext);
 
         this.message('capture', { dataURI: context.canvas.toDataURL('image/png'), options: this.options });
     },
