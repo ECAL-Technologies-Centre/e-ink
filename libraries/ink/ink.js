@@ -1,4 +1,4 @@
-/*Version 0.1*/
+/*Version 0.2*/
 
 const Ink = {
 
@@ -6,6 +6,8 @@ const Ink = {
     id: 'anonymous', //default id/name
     host: '192.168.137.1',
     port: 3000,
+
+    defDims: [2560, 1440],
 
     options: {
         dimensions: [2560, 1440], //[2560, 1440], [1440, 2560]
@@ -16,16 +18,25 @@ const Ink = {
         partial: true, //true, false
         loop: () => loop(),
         noLoop: () => noLoop(),
+        orientation: 'left', //left or right
     },
+
+    
 
     connected: false,
     idle: true,
 
     connect(connectParams = {options: {}}) {
 
+        console.log('Running Ink.js v0.2');
+
         connectParams.options = Object.assign(this.options, connectParams.options);
 
         Object.assign(this, connectParams);
+
+        //rotation fix
+        this.lockRotation();
+        this.initOffscreenCanvas();
 
         let headers = btoa(JSON.stringify({ id: this.id }));
 
@@ -91,11 +102,51 @@ const Ink = {
 
         let context = this.options.context || (window._renderer && window._renderer.drawingContext);
 
-        this.message('capture', { dataURI: context.canvas.toDataURL('image/png'), options: this.options });
+        let img = this.applyImage(context);
+
+        // context.drawImage(img, 0,0);
+
+        this.message('capture', { dataURI: img.toDataURL('image/png'), options: this.options });
+    },
+
+    applyImage(ctx) {
+
+        let c = this.offCtx;
+        let cv = c.canvas;
+
+        c.save();
+
+        c.translate(cv.width/2, cv.height/2);
+
+        //force image rotation
+        if(ctx.canvas.width < ctx.canvas.height) {    
+            let angle = (this.options.orientation === 'left' ? 1 : -1) * Math.PI/2;
+            c.rotate(angle);
+        }
+
+        c.translate(-ctx.canvas.width/2, -ctx.canvas.height/2);
+
+        c.drawImage(ctx.canvas, 0, 0);
+
+        c.restore();
+
+        return c.canvas;
     },
 
     setOptions(options = {}) {
         Object.assign(this.options, options);
+        this.lockRotation();
+    },
+
+    lockRotation() {
+        this.options.dimensions = this.defDims;
+    },
+
+    initOffscreenCanvas() {
+        let canvas = document.createElement('canvas');
+        this.offCtx = canvas.getContext('2d');
+
+        [canvas.width , canvas.height ] = this.defDims;
     },
 
     _resume(e) {

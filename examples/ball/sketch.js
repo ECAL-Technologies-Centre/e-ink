@@ -9,12 +9,13 @@ function setup() {
     Clock.init({ date: new Date(), trueTime: false }); //date: start time, trueTime: if false, the time is only updated by Clock.tick();
 
     const inkOptions = {
+
         dither: 'bayer', //dithering: 'bayer', 'none', 'floyd-steinberg'
         invert: false, //invert frame: removes ghosting
-        dimensions: [2560, 1440] //portrait orientation: [1440, 2560] 
+        dimensions: [2560, 1440] //portrait orientation: [1440, 2560]
     }
 
-    //Ink.connect({ id: 'Ball Example', options: inkOptions}); //connect to eInk via a server to display image
+    Ink.connect({ id: 'Ball Example', options: inkOptions, host: 'localhost',}); //connect to eInk via a server to display image
 
     createCanvas(...inkOptions.dimensions);
     pixelDensity(1);
