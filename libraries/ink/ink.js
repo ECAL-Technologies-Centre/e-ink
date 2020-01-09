@@ -1,4 +1,5 @@
-/*Version 0.2*/
+/*Version 0.3*/
+console.log('Running Ink.js v0.3');
 
 const Ink = {
 
@@ -6,6 +7,8 @@ const Ink = {
     id: 'anonymous', //default id/name
     host: '192.168.137.1',
     port: 3000,
+
+    clear: true, //Remove ghosting of previous client.
 
     defDims: [2560, 1440],
 
@@ -28,8 +31,6 @@ const Ink = {
 
     connect(connectParams = {options: {}}) {
 
-        console.log('Running Ink.js v0.2');
-
         connectParams.options = Object.assign(this.options, connectParams.options);
 
         Object.assign(this, connectParams);
@@ -45,6 +46,11 @@ const Ink = {
         this.connected = new Promise(resolve => this.resolveConnection = resolve);
 
         this._pause();
+
+        window.addEventListener('beforeunload', (e) => {
+            this.socket.close();
+            return;
+        });
 
         this.socket.onopen = e => {
             this.resolveConnection();
@@ -63,7 +69,7 @@ const Ink = {
             this._resume();
             this.socket = undefined;
 
-            console.log('Now running offline');
+            alert('Now running offline. \nTry to refresh\nOR\nDon\'t connect by commenting the line "Ink.connect...".');
         }
 
         this.socket.onerror = e => {
@@ -106,7 +112,14 @@ const Ink = {
 
         // context.drawImage(img, 0,0);
 
-        this.message('capture', { dataURI: img.toDataURL('image/png'), options: this.options });
+        const currOptions = Object.assign({}, this.options);
+
+        if(this.clear) {
+            currOptions.invert = true;
+            this.clear = false;
+        }
+
+        this.message('capture', { dataURI: img.toDataURL('image/png'), options: currOptions });
     },
 
     applyImage(ctx) {
@@ -147,6 +160,13 @@ const Ink = {
         this.offCtx = canvas.getContext('2d');
 
         [canvas.width , canvas.height ] = this.defDims;
+    },
+
+    _start(e) {
+
+        this.clear = true;
+        //resume draw loop
+        this._resume(e);
     },
 
     _resume(e) {
