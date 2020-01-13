@@ -19,7 +19,8 @@ const CONF = {
 	uuid: '22002700-0551-3730-3234-393600000000',
 	host: '192.168.137.1',
 	key: '0dcdf81e05377c83',
-	secret: 'AANIWzpQiGXmSjhfN8u2lCpGTLWiwcirC5PAP7flVyY'
+	secret: 'AANIWzpQiGXmSjhfN8u2lCpGTLWiwcirC5PAP7flVyY',
+	comparedelay: 100,
 }
 
 const ADMIN = {
@@ -131,9 +132,11 @@ const ENCRYPT = {
 const DEVICE = {
 
 	config: undefined,
+
+	liveView: undefined,
 	
 	async retrieveConfig() {
-		this.config = await this.getConfig().catch(e => console.error('Get device config failed.'));
+		this.config = await this.getConfig().catch(e => console.error(e));
 		console.log('Device config retrieved!');
 	},
 
@@ -179,19 +182,21 @@ const DEVICE = {
 		return new Promise((resolve, reject) => {
 
 			let form = new FORMDATA();
-	
+
+			let response = '';
+
 			let headers = { "content-type": 'application/json' },
-				date = Date(),
-				path = '/api/device/' + CONF.uuid,
-				verb = 'GET';
-	
+			date = new Date().toUTCString(),
+			path = '/api/device/' + CONF.uuid,
+			verb = 'GET';
+
 			let auth = CRYPTO.createHmac('sha256', CONF.secret)
-				.update(UTIL.format('%s\n%s\n%s\n%s\n%s', verb, '', headers['content-type'], date, path))
-				.digest('base64');
-	
+			.update(UTIL.format('%s\n%s\n%s\n%s\n%s', verb, '', headers['content-type'], date, path))
+			.digest('base64');
+
 			headers.Date = date;
 			headers.Authorization = UTIL.format('%s:%s', CONF.key, auth);
-	
+
 			let request = HTTP.request({
 				method: verb,
 				host: CONF.host,
@@ -200,18 +205,103 @@ const DEVICE = {
 				headers: headers
 			}, res => {
 				// console.log(`statusCode: ${res.statusCode}`);
-	
+
 				res.on('data', d => {
-					resolve(d.toString());
+					response += d.toString();
+				})
+
+				res.on('end', _ => {
+					resolve(response);
 				})
 			});
-	
+
 			request.on('error', error => {
 				reject(error);
 			})
-	
+
 			request.end();
 		});
+	},
+
+	async retrieveLiveView() {
+
+		this.liveView = await DEVICE.getLiveView().catch(e => console.log('Error getting the liveView'));
+		console.log('Live view initiated!');
+
+	},
+
+	getLiveView() {
+
+		return new Promise((resolve, reject) => {
+
+			let responses = '';
+
+			let form = new FORMDATA();
+
+			let headers = { "content-type": 'application/octet-stream' },
+			date = new Date().toUTCString(),
+			path = '/api/live/device/' + CONF.uuid + '/image',
+			verb = 'GET';
+
+			let auth = CRYPTO.createHmac('sha256', CONF.secret)
+			.update(UTIL.format('%s\n%s\n%s\n%s\n%s', verb, '', headers['content-type'], date, path))
+			.digest('base64');
+
+			headers.Date = date;
+			headers.Authorization = UTIL.format('%s:%s', CONF.key, auth);
+
+			let request = HTTP.request({
+				method: verb,
+				gzip: true,
+				host: CONF.host,
+				port: 8081,
+				path: path,
+				headers: headers
+			}, res => {
+				// console.log(`statusCode: ${res.statusCode}`);
+
+				res.on('data', d => {
+					responses += d.toString('hex');
+				});
+
+				res.on('end', d => {
+					// console.log(responses);
+					resolve(responses);
+				});
+			});
+
+			// request.setEncoding('binary');
+
+			request.on('error', error => {
+				reject(error);
+			})
+
+			request.end();
+		});
+	},
+
+	async liveViewUpdated() {
+
+		let oldView = DEVICE.liveView,
+			newView,
+			interval = CONF.comparedelay;
+
+		while(true) {
+			
+			newView = await DEVICE.getLiveView();
+
+			if(oldView !== newView)
+				break;
+
+			await UTILS.delay(interval);
+
+			console.log('Same image...');
+
+		}
+
+		console.log('Image updated!!');
+		this.liveView = newView;
+		
 	},
 
 	mapConfig(options) {
@@ -221,6 +311,7 @@ const DEVICE = {
 		try {
 			conf = JSON.parse(this.config);
 		} catch (e) {
+			console.log('Failed to map config!!!');
 			return false;
 		}
 
@@ -250,26 +341,28 @@ const DEVICE = {
     setConfig(options) {
     	return new Promise((resolve, reject) => {
 
+
+
     		let data = this.mapConfig(options);
 
     		if (!this.config || data === this.config) {
-				return resolve();
-            }
+    			return resolve();
+    		}
 
-            this.config = data;
-            console.log('Device parameters updated.');
+    		this.config = data;
+    		console.log('Device parameters updated.');
 
-            let request = ENCRYPT.request('PUT', res => resolve());
+    		let request = ENCRYPT.request('PUT', res => resolve());
 
-            request.on('error', error => {
-				console.log('error');
-            	console.log(error);
+    		request.on('error', error => {
+    			console.log('error');
+    			console.log(error);
             	resolve(); //or reject maybeh
             });
 
-            request.write(data);
-            request.end();
-        });
+    		request.write(data);
+    		request.end();
+    	});
     }
 }
 
@@ -336,6 +429,7 @@ const SESSION = {
 			let headers = { "content-type": 'application/json' };
 			let path = '/api/session';
 			let verb = 'GET';
+			let responses = '';
 
 			headers = ENCRYPT.header(verb, path, headers);
 
@@ -349,8 +443,13 @@ const SESSION = {
 	            // console.log(`statusCode: ${res.statusCode}`);
 	            res.on('data', d => {
 	                // console.log(d.toString());
-	                resolve(d.toString());
+	                responses += d.toString();
 	            })
+
+	            res.on('end', d => {
+					// console.log(responses);
+					resolve(responses);
+				})
 	        });
 
 			request.on('error', error => {
@@ -411,10 +510,12 @@ const CLIENTS = {
 			console.log(`Capture from "${client.id}" received.`);
 
 			await SESSION.setConfig(options).catch(e => console.error("Set session config failed."));
-			await DEVICE.setConfig(options).catch(e => console.error("Set device config failed."));
+			await DEVICE.setConfig(options).catch(e => console.error(e));
 			await DEVICE.sendImage(dataURI).catch(error => console.error("SendImage failed."));
 
-			console.log('Image sent.')
+			console.log('Image sent.');
+
+			await DEVICE.liveViewUpdated();
 
 			if (!this.isCurrClient(client))
 				return;
@@ -617,7 +718,13 @@ const UTILS = {
 			return;
 
 		receiver.socket.send(JSON.stringify({ type: type, data: data }));
-	}
+	},
+
+	delay(millis = 0) {
+		return new Promise(res => {
+			setTimeout(res, millis);
+		});
+	},
 }
 
 function createServer() {
@@ -707,7 +814,6 @@ function getConfig() {
 		
 		FS.writeFileSync(pathConfig, JSON.stringify(mergedArgs));
 		console.log(`"${pathConfig}" rewritten.`);
-		console.log(mergedArgs);
 		
 	}
 
@@ -720,10 +826,24 @@ async function init() {
 	await SESSION.retrieveConfig();
 	await DEVICE.retrieveConfig();
 
+	await DEVICE.retrieveLiveView();
+
+	//DEVICE.liveView = await DEVICE.getLiveView();
+	//await loopLiveView();
+	
+
+	//let image2 = await DEVICE.getLiveView();
+
+	// let strRes = responses.map(raw => raw.toString('binary'));
+	// console.log(strRes.join(''));
+	
+	// FS.writeFile('test.jpg', buffer, 'binary');
 	//console.log(SESSION.config);
 	//console.log(DEVICE.config);
 
 	getConfig();
+	console.log('Current server configuration: ');
+	console.log(CONF);
 	createServer();
 	createSocket();
 }

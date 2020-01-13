@@ -1,5 +1,5 @@
-/*Version 0.3*/
-console.log('Running Ink.js v0.3');
+/*Version 0.4*/
+console.log('Running Ink.js v0.4');
 
 const Ink = {
 
@@ -22,9 +22,7 @@ const Ink = {
         loop: () => loop(),
         noLoop: () => noLoop(),
         orientation: 'left', //left or right
-    },
-
-    
+    },    
 
     connected: false,
     idle: true,
@@ -108,7 +106,9 @@ const Ink = {
 
         let context = this.options.context || (window._renderer && window._renderer.drawingContext);
 
-        let img = this.applyImage(context);
+        
+        this.applyImage(context);
+        this.applyFrameIndicator();
 
         // context.drawImage(img, 0,0);
 
@@ -119,7 +119,29 @@ const Ink = {
             this.clear = false;
         }
 
-        this.message('capture', { dataURI: img.toDataURL('image/png'), options: currOptions });
+        this.message('capture', { dataURI: this.offCtx.canvas.toDataURL('image/png'), options: currOptions });
+    },
+
+    applyFrameIndicator() {
+        let c = this.offCtx;
+        let cv = c.canvas;
+        let millis = Date.now();
+        let binary = millis.toString(2);
+
+        c.save();
+        c.translate(0, cv.height-1);
+        //draw background
+        c.fillStyle = 'black';
+        c.fillRect(0,0,binary.length, 1);
+        c.fillStyle = 'white';
+        //draw squares
+        for(let i = 0; i < binary.length; i++) {
+
+            if(binary[i] === '1')
+                c.fillRect(i,0,1,1);
+        }
+
+        c.restore();
     },
 
     applyImage(ctx) {

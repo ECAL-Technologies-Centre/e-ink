@@ -4,143 +4,143 @@
 <head>
     <title>Visionect Sketch Selector</title>
     <style type="text/css">
-    /*remove css*/
+        /*remove css*/
 
-    button {
-        background: none;
-        color: inherit;
-        border: none;
-        padding: 0;
-        font: inherit;
-        cursor: pointer;
-        outline: inherit;
-    }
-
-    h2 {
-        margin: 0;
-        font-size: inherit;
-        font-weight: normal;
-    }
-
-    :root {
-        --main-margins: 20px;
-        --header-height: 60px;
-    }
-
-    html,
-    body {
-        font-family: helvetica, sans-serif;
-        margin: 0;
-        width: 100%;
-    }
-
-    body {
-        padding: var(--main-margins);
-        box-sizing: border-box;
-    }
-
-    .top {
-        z-index: 20;
-        position: fixed;
-        /*height: var(--header-height);*/
-        width: 100%;
-        background: black;
-        top: 0;
-        left: 0;
-        color: white;
-        padding: var(--main-margins);
-        box-sizing: border-box;
-    }
-
-    .users {
-        position: relative;
-        top: var(--header-height);
-        width: 100%;
-        overflow-y: scroll;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, 20%);
-        grid-auto-rows: 1fr;
-    }
-
-    .users::before {
-        content: '';
-        width: 0;
-        padding-bottom: 100%;
-        grid-row: 1 / 1;
-        grid-column: 1 / 1;
-    }
-
-    .users>button:first-child {
-        grid-row: 1 / 1;
-        grid-column: 1 / 1;
-    }
-
-    /* Just to make the grid visible */
-
-    .users>button {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: white;
-    }
-
-    .users>button:focus,
-    .users>button:hover {
-
-        outline: 3px solid black;
-        outline-offset: -3px;
-    }
-
-    .users>button:hover:active,
-    .users>button.selected {
-        background: black;
-        color: white;
-    }
-
-    .users>button.selected.loading::after {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        content: '';
-        mix-blend-mode: difference;
-        background: linear-gradient(0deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8));
-        background-size: 200% 200%;
-        animation: _clientLoading 2s linear infinite;
-    }
-
-    .offline {
-        top: 0;
-        left: 0;
-        position: fixed;
-        z-index: 1000;
-        width: 100%;
-        height: 100%;
-        background: black;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 50px;
-        box-sizing: border-box;
-        text-align: center;
-    }
-
-    .offline.hide {
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    @keyframes _clientLoading {
-
-        0% {
-            background-position: 50% 0%
+        button {
+            background: none;
+            color: inherit;
+            border: none;
+            padding: 0;
+            font: inherit;
+            cursor: pointer;
+            outline: inherit;
         }
 
-        100% {
-            background-position: 50% 400%
+        h2 {
+            margin: 0;
+            font-size: inherit;
+            font-weight: normal;
         }
-    }
+
+        :root {
+            --main-margins: 20px;
+            --header-height: 60px;
+        }
+
+        html,
+        body {
+            font-family: helvetica, sans-serif;
+            margin: 0;
+            width: 100%;
+        }
+
+        body {
+            padding: var(--main-margins);
+            box-sizing: border-box;
+        }
+
+        .top {
+            z-index: 20;
+            position: fixed;
+            /*height: var(--header-height);*/
+            width: 100%;
+            background: black;
+            top: 0;
+            left: 0;
+            color: white;
+            padding: var(--main-margins);
+            box-sizing: border-box;
+        }
+
+        .users {
+            position: relative;
+            top: var(--header-height);
+            width: 100%;
+            overflow-y: scroll;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 20%);
+            grid-auto-rows: 1fr;
+        }
+
+        .users::before {
+            content: '';
+            width: 0;
+            padding-bottom: 100%;
+            grid-row: 1 / 1;
+            grid-column: 1 / 1;
+        }
+
+        .users>button:first-child {
+            grid-row: 1 / 1;
+            grid-column: 1 / 1;
+        }
+
+        /* Just to make the grid visible */
+
+        .users>button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .users>button:focus,
+        .users>button:hover {
+
+            outline: 3px solid black;
+            outline-offset: -3px;
+        }
+
+        .users>button:hover:active,
+        .users>button.selected {
+            background: black;
+            color: white;
+        }
+
+        .users>button.selected.loading::after {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            content: '';
+            mix-blend-mode: difference;
+            background: linear-gradient(0deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8));
+            background-size: 200% 200%;
+            animation: _clientLoading 2s linear infinite;
+        }
+
+        .offline {
+            top: 0;
+            left: 0;
+            position: fixed;
+            z-index: 1000;
+            width: 100%;
+            height: 100%;
+            background: black;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .offline.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes _clientLoading {
+
+            0% {
+                background-position: 50% 0%
+            }
+
+            100% {
+                background-position: 50% 400%
+            }
+        }
     </style>
 </head>
 
@@ -148,130 +148,199 @@
     <header class="top">
         <h2>Visionect Sketch Selector</h2>
     </header>
-    <article class="users">
-    </article>
+    <article class="users"></article>
     <article class="offline hide">
         <div>
             <h1>Cannot connect to node server.</h1>
-            <span class="msg"><span>
+            <span class="msg"></span>
         </div>
     </article>
     <script type="text/javascript">
-    let SOCKET = new WebSocket(`ws://${window.location.host}/server/?admin`);
-    let resolveConnection;
-    let CONNECTED = new Promise(resolve => resolveConnection = resolve);
 
-    const DOM = {
-        model: document.createElement('button'),
-        grid: document.querySelector('.users'),
-        offline: document.querySelector('.offline')
-    }
 
-    DOM.model.classList.add('client');
+        const DOM = {};
 
-    const ACTIONS = {
-        clientConnected(clientInfo) {
-            addClient(clientInfo);
-        },
+        const CLIENT = {
 
-        removeClient(id) {
-            let clientNode = document.getElementById(btoa(id));
-            clientNode.parentNode.removeChild(clientNode);
-        },
+            add(clientInfos) {
 
-        clientSending(id) {
-            let clientNode = document.getElementById(btoa(id));
-            clientNode.classList.remove('loading');
-        },
+                const clone = DOM.model.cloneNode(true);
 
-        clientsOnline(list) {
-            console.log(list);
-            for (const clientInfos of list) {
-                addClient(clientInfos);
+                console.log(clientInfos);
+
+                clone.textContent = clientInfos.id;
+                clone.id = this.parse(clientInfos.id);
+                DOM.grid.appendChild(clone);
+
+            },
+
+            select(clientNode) {
+
+                if (!clientNode.classList.contains('client') || clientNode.classList.contains('selected'))
+                    return;
+
+                let id = this.stringify(clientNode.id);
+
+                SERVER.message('selectClient', id);
+            },
+
+            confirm(id) {
+
+                console.log('Client confirmed!');
+                let clientNode = this.getNodeById(id);
+                DOM.grid.querySelectorAll('.client.selected').forEach(c => c.classList.remove('selected'));
+
+                this.showLoading(clientNode);
+                this.showSelection(clientNode);
+                
+            },
+
+            showSelection(clientNode) {
+                clientNode.classList.add('selected');
+            },
+
+            showLoading(clientNode) {
+                clientNode.classList.add('loading');
+            },
+
+            getNodeById(id) {
+                return document.getElementById(this.parse(id));
+            },
+
+            stringify(base64) {
+                return atob(base64);
+            },
+
+            parse(string) {
+                return btoa(string);
             }
-        },
 
-        highLightClient(id) {
-            highLightClient(btoa(id));
         }
-    }
 
-    function addClient(clientInfos) {
-        const clone = DOM.model.cloneNode(true);
-        clone.textContent = clientInfos.id;
-        clone.id = btoa(clientInfos.id);
-        DOM.grid.appendChild(clone);
+        const SERVER = {
 
-        if (clientInfos.selected)
-            clientLoaded(clone);
-    }
+            //variables
+            connected: undefined,
+            socket: undefined,
+            resolveConnection: undefined,
 
-    SOCKET.onclose = e => {
-        showMessage();
-    }
+            //message received from server
+            actions: {
 
-    SOCKET.onerror = e => {
-        showMessage();
-    }
+                "clientConnected": function(clientInfo) {
+                    CLIENT.add(clientInfo);
+                },
 
-    SOCKET.onmessage = e => {
-        let msg = JSON.parse(e.data);
-        ACTIONS[msg.type](msg.data);
-    }
+                "clientDisconnected": function(id) {
+                    let clientNode = CLIENT.getNodeById(id);
+                    if(clientNode)
+                        clientNode.parentNode.removeChild(clientNode);
+                },
 
-    SOCKET.onopen = e => {
-        hideMessage();
-        resolveConnection();
-    }
+                "clientSending": function(id) {
+                    let clientNode = CLIENT.getNodeById(id);
 
-    async function message(action, options) {
-        if (CONNECTED === false)
-            return;
+                    if(clientNode)
+                        clientNode.classList.remove('loading');
+                },
 
-        await CONNECTED;
+                "clientSelected": function(id) {
+                    CLIENT.select(id);
+                },
 
-        SOCKET.send(JSON.stringify({
-            type: action,
-            data: options
-        }));
-    }
+                "confirmSelection": function(id) {
+                    CLIENT.confirm(id);
+                },
 
-    function hideMessage() {
-        console.log('CONNECTED');
-        DOM.offline.classList.add('hide');
-    }
+                "clientsList": function(list) {
+                    console.log('Client list: ', list);
+                    for (const clientInfos of list) {
+                        CLIENT.add(clientInfos);
+                    }
+                },
+            },
 
-    function showMessage(msg) {
-        let inner = msg || "Make sure it's running and that you have only one <i>Sketch Selector</i> open.";
-        DOM.offline.classList.remove('hide');
-        DOM.offline.querySelector('.msg').innerHTML = inner;
-    }
+            //methods
 
-    DOM.grid.addEventListener('click', e => selectClient(e.target));
+            // clientLoaded(clientNode) {
+            //     clientNode.classList.add('selected');
+            //     clientNode.classList.remove('loading');
+            // }
 
-    function selectClient(clientNode) {
+            do(action, data) {
+                this.actions[action].call(this, data);
 
-        if (!clientNode.classList.contains('client'))
-            return;
+            },
 
-        highLightClient(clientNode.id);
+            async message(action, options) {
+                if (this.connected === false)
+                    return;
 
-        let id = atob(clientNode.id);
-        
-        message('selectClient', id);
-    }
+                await this.connected;
 
-    function highLightClient(id) {
-        let clientNode = document.getElementById(id);
-        DOM.grid.querySelectorAll('.client.selected').forEach(c => c.classList.remove('selected'));
-        clientNode.classList.add('selected');
-        clientNode.classList.add('loading');
-    }
+                this.socket.send(JSON.stringify({
+                    type: action,
+                    data: options
+                }));
+            },
 
-    function clientLoaded(clientNode) {
-        clientNode.classList.add('selected');
-        clientNode.classList.remove('loading');
-    }
+            setSocket() {
+                this.socket = new WebSocket(`ws://${window.location.host}/server/?admin`);
+                SERVER.connected = new Promise(resolve => this.resolveConnection = resolve);
+
+                window.addEventListener('beforeunload', (e) => {
+                    this.socket.close();
+                    return;
+                });
+
+                this.socket.onclose = e => {
+                    showMessage();
+                }
+
+                this.socket.onerror = e => {
+                    showMessage();
+                }
+
+                this.socket.onmessage = e => {
+                    let msg = JSON.parse(e.data);
+                    SERVER.do(msg.type, msg.data);
+                }
+
+                this.socket.onopen = e => {
+                    hideMessage();
+                    this.resolveConnection();
+                }
+            }
+        }
+
+        function hideMessage() {
+            console.log('Connected to server.');
+            DOM.offline.classList.add('hide');
+        }
+
+        function showMessage(msg) {
+            let inner = msg || "Make sure it's running and that you have only one <i>Sketch Selector</i> open.";
+            DOM.offline.classList.remove('hide');
+            DOM.offline.querySelector('.msg').innerHTML = inner;
+        }
+
+        function constructHTML() {
+            DOM.model = document.createElement('button');
+            DOM.grid = document.querySelector('.users');
+            DOM.offline = document.querySelector('.offline');
+
+            DOM.model.classList.add('client');
+            DOM.grid.addEventListener('click', e => CLIENT.select(e.target));
+        }
+
+        function init() {
+            constructHTML();
+            SERVER.setSocket();
+        }
+
+        window.addEventListener('load', function() {
+            init();
+        });
     </script>
 </body>
 

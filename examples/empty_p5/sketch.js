@@ -1,5 +1,5 @@
 function setup() {
-    
+
     Clock.init({ date: new Date(), trueTime: false }); //date: start time, trueTime: if false, the time is only updated by Clock.tick();
 
     const inkOptions = {
@@ -8,7 +8,7 @@ function setup() {
         dimensions: [2560, 1440] //portrait orientation: [1440, 2560] 
     }
     
-    //Ink.connect({ id: 'Empty Example p5', options: inkOptions}); //connect to eInk via a server to display image
+    // Ink.connect({ id: 'Empty Example p5', options: inkOptions}); //connect to eInk via a server to display image
 
     createCanvas(...inkOptions.dimensions);
     pixelDensity(1);
@@ -19,9 +19,11 @@ function setup() {
 function draw() {
 
     /*YOUR SKETCH*/
+    background(0);
 
     Clock.tick(); //updates clock when trueTime is set to false
     Clock.display({ scale: 1, black: true }); //display time on top left of canvas    
+
     Ink.capture(); //send screenshot of canvas to eInk
 
     console.log(Clock.getSeconds());

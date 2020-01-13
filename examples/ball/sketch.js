@@ -15,7 +15,7 @@ function setup() {
         dimensions: [2560, 1440] //portrait orientation: [1440, 2560]
     }
 
-    //Ink.connect({ id: 'Ball Example', options: inkOptions}); //connect to eInk via a server to display image
+    // Ink.connect({ id: 'Ball Example', options: inkOptions}); //connect to eInk via a server to display image
 
     createCanvas(...inkOptions.dimensions);
     pixelDensity(1);
