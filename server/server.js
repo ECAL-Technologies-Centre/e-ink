@@ -15,12 +15,12 @@ let WS;
 //As an example, use the command "node server.js -port 3333 -host localhost" to set new values.
 
 const CONF = {
-	port: 3000,
-	uuid: '22002700-0551-3730-3234-393600000000',
-	host: '192.168.137.1',
-	key: '0dcdf81e05377c83',
-	secret: 'AANIWzpQiGXmSjhfN8u2lCpGTLWiwcirC5PAP7flVyY',
-	comparedelay: 100,
+	"port":3000,
+	"uuid":"22002700-0551-3730-3234-393600000000",
+	"host":"localhost",
+	"key":"eb1fac7a835ddcf2",
+	"secret":"zbXDQjeuhxOPuAnv7EW9PvFxnQ4f3TbGgB0VfeaGabg",
+	"comparedelay":50,
 }
 
 const ADMIN = {
@@ -39,8 +39,11 @@ const ADMIN = {
 
 	//methods
 	getSimplifiedClientList() {
+
 		let clientArray = Array.from(CLIENTS.list.values());//send to admin which clients are online
-		let simplifiedArray = clientArray.map(client => UTILS.ignoreKeys(client, ["socket"]));
+		let simplifiedArray = clientArray.map(client => CLIENTS.simplifyClientObject(client));
+
+		console.log(simplifiedArray);
 
 		return simplifiedArray;
 	},
@@ -618,6 +621,10 @@ const CLIENTS = {
 		}
 	},
 
+	simplifyClientObject(client) {
+		return UTILS.ignoreKeys(client, ["socket"]);
+	},
+
 	addClient(socket, req) {
 
 		const client = {
@@ -632,7 +639,7 @@ const CLIENTS = {
 
 		this.list.set(client.id, client);
 
-		UTILS.sendMessage(ADMIN, 'clientConnected', client);
+		UTILS.sendMessage(ADMIN, 'clientConnected', this.simplifyClientObject(client));
 
 		console.log(client.id + ' connected.');
 
@@ -823,6 +830,10 @@ function getConfig() {
 
 async function init() {
 
+	getConfig();
+	console.log('Current server configuration: ');
+	console.log(CONF);
+
 	await SESSION.retrieveConfig();
 	await DEVICE.retrieveConfig();
 
@@ -841,9 +852,7 @@ async function init() {
 	//console.log(SESSION.config);
 	//console.log(DEVICE.config);
 
-	getConfig();
-	console.log('Current server configuration: ');
-	console.log(CONF);
+	
 	createServer();
 	createSocket();
 }
