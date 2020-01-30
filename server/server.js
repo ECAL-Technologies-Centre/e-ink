@@ -15,13 +15,99 @@ let WS;
 //As an example, use the command "node server.js -port 3333 -host localhost" to set new values.
 
 const CONF = {
+	"offline": true,
+	"showreel": "10s", //false or interval: ex: "10s", "20m", "1h". If the unit omitted, default in second
 	"port":3000,
 	"uuid":"22002700-0551-3730-3234-393600000000",
 	"host":"localhost",
 	"key":"eb1fac7a835ddcf2",
 	"secret":"zbXDQjeuhxOPuAnv7EW9PvFxnQ4f3TbGgB0VfeaGabg",
 	"comparedelay":50,
+	"autoConnect": true,
 }
+
+const SHOWREEL = {
+
+	maps: {
+		"ms": 1,
+		"s": 1000,
+		"m": 1000 * 60,
+		"h": 1000 * 60 * 60,
+	},
+
+	init(options) {
+
+		let defaults = {
+			delay: "10s",
+			trueTime: true,
+		}
+
+		Object.assign(this, defaults, options);
+
+		if(this.delay === true) { //set to default if delay is set to [true].
+			this.delay = defaults.delay;
+		}
+
+		//set time
+
+		let delay_round = this.calcDelay(this.delay);
+		this.delay = delay_round.delay;
+		this.lastUpdate = delay_round.lastUpdate;
+
+		console.log(`Showreel initiated with an interval of ${this.delay}ms`);
+
+
+		//update frequency. faster delay -> more accurate clock
+		let intervalFreq = 1000/60;
+		this.interval = setInterval(this.update.bind(this), intervalFreq);
+	},
+
+	roundTime(millisDelay = 0) {
+		let currTime = Date.now();
+		let roundedTime = UTILS.floorRemainder(currTime, millisDelay);
+		return roundedTime;
+	},
+
+	roundUnit(clock, unit) {
+		let currAmt = clock['get'+unit]();
+		let rounded = UTILS.floorRemainder(currAmt);
+
+		console.log(unit, currAmt, rounded);
+
+		clock['set'+unit](rounded);
+	},
+
+
+	calcDelay(delay_unit) {
+
+		let delayData = delay_unit;
+		let delay = parseFloat(delayData);
+		let unit = delayData.replace(delay, '') || 's';
+		let millisDelay = delay * this.maps[unit];
+		let lastUpdate = this.roundTime(millisDelay, unit); // mapping delay
+
+		return {
+			delay: millisDelay,
+			lastUpdate: lastUpdate
+		}
+	},
+
+	update() {
+
+		let currTime = Date.now();
+		let deltaTime = (this.lastUpdate + this.delay) - currTime;
+
+		if(deltaTime <= 0) {
+
+			CLIENTS.cycle();
+			this.lastUpdate = currTime + deltaTime;
+			
+		}
+	},
+
+
+}
+
 
 const ADMIN = {
 
@@ -43,7 +129,7 @@ const ADMIN = {
 		let clientArray = Array.from(CLIENTS.list.values());//send to admin which clients are online
 		let simplifiedArray = clientArray.map(client => CLIENTS.simplifyClientObject(client));
 
-		console.log(simplifiedArray);
+		console.log('Current client list: ', simplifiedArray);
 
 		return simplifiedArray;
 	},
@@ -139,6 +225,10 @@ const DEVICE = {
 	liveView: undefined,
 	
 	async retrieveConfig() {
+
+		if(isOffline())
+			return;
+
 		this.config = await this.getConfig().catch(e => console.error(e));
 		console.log('Device config retrieved!');
 	},
@@ -286,8 +376,8 @@ const DEVICE = {
 	async liveViewUpdated() {
 
 		let oldView = DEVICE.liveView,
-			newView,
-			interval = CONF.comparedelay;
+		newView,
+		interval = CONF.comparedelay;
 
 		while(true) {
 			
@@ -344,8 +434,6 @@ const DEVICE = {
     setConfig(options) {
     	return new Promise((resolve, reject) => {
 
-
-
     		let data = this.mapConfig(options);
 
     		if (!this.config || data === this.config) {
@@ -374,6 +462,10 @@ const SESSION = {
 	config: undefined,
 
 	async retrieveConfig() {
+
+		if(isOffline())
+			return;
+
 		this.config = await this.getConfig().catch(e => console.error("Get session config failed."));
 		console.log('Session config retrieved!');
 
@@ -512,13 +604,15 @@ const CLIENTS = {
 
 			console.log(`Capture from "${client.id}" received.`);
 
-			await SESSION.setConfig(options).catch(e => console.error("Set session config failed."));
-			await DEVICE.setConfig(options).catch(e => console.error(e));
-			await DEVICE.sendImage(dataURI).catch(error => console.error("SendImage failed."));
-
-			console.log('Image sent.');
-
-			await DEVICE.liveViewUpdated();
+			if(!isOffline()) {
+				await SESSION.setConfig(options).catch(e => console.error("Set session config failed."));
+				await DEVICE.setConfig(options).catch(e => console.error(e));
+				await DEVICE.sendImage(dataURI).catch(error => console.error("SendImage failed."));
+				console.log('Image sent.');
+				await DEVICE.liveViewUpdated();
+			} else {
+				await UTILS.delay(1000);
+			}
 
 			if (!this.isCurrClient(client))
 				return;
@@ -550,7 +644,7 @@ const CLIENTS = {
 
 			this.currClient = this.list.get(id);
 
-			if(oldClient && oldClient === id)
+			if(oldClient && oldClient === this.currClient)
 				return;
 
 			if(!this.currClient) {
@@ -572,6 +666,34 @@ const CLIENTS = {
 
 			// configureInk(CURRCLIENT);
 		}
+	},
+
+	cycle() {
+
+		console.log('Cycling...');
+
+		if(this.list.size === 0)
+			return;
+
+		let clientKey;
+
+		if(!this.currClient) {
+
+			clientKey = this.list.keys().next().value;
+
+		} else {
+
+			let keys = Array.from(this.list.keys());
+			let currIndex = keys.indexOf(this.currClient.id);
+			let nextIndex = (currIndex + 1) % keys.length;
+
+			clientKey = keys[nextIndex];
+
+		}
+
+		let selectedClient = this.list.get(clientKey);
+
+		this.select(selectedClient.id);
 	},
 
 	pauseClient(client) {
@@ -643,6 +765,8 @@ const CLIENTS = {
 
 		console.log(client.id + ' connected.');
 
+		this.autoConnection();
+
 		socket.on('message', string => {
 			let msg = JSON.parse(string);
 			this.do(msg.type, client, msg.data);
@@ -655,12 +779,25 @@ const CLIENTS = {
 
 			this.resetIfCurr(client);
 
-			UTILS.sendMessage(ADMIN, 'clientDisconnected', client.id);
+			this.autoConnection();
+
+			UTILS.sendMessage(ADMIN, 'clientDisconnected', client.id);			
 		});
+	},
+
+	autoConnection() { //auto connect if one client remaining
+		if(this.list.size === 1 && CONF.autoConnect)
+			this.cycle();
+
 	},
 }
 
 const UTILS = {
+
+	floorRemainder(n, m) {
+		let r = n%m; //remaider
+		return n-r;
+	},
 
 	parseString(str = "") {
 
@@ -828,33 +965,48 @@ function getConfig() {
 
 }
 
+function isOffline() {
+	return CONF.offline;
+}
+
 async function init() {
 
 	getConfig();
 	console.log('Current server configuration: ');
 	console.log(CONF);
 
-	await SESSION.retrieveConfig();
-	await DEVICE.retrieveConfig();
+	if(!CONF.offline) {
 
-	await DEVICE.retrieveLiveView();
+		await SESSION.retrieveConfig();
+		await DEVICE.retrieveConfig();
+		await DEVICE.retrieveLiveView();
 
-	//DEVICE.liveView = await DEVICE.getLiveView();
-	//await loopLiveView();
+	} else {
+		console.log('Running in offline mode, connection to e-paper disabled.');
+	}
+
+	// DEVICE.liveView = await DEVICE.getLiveView();
+	// await loopLiveView();
 	
-
-	//let image2 = await DEVICE.getLiveView();
-
+	// let image2 = await DEVICE.getLiveView();
 	// let strRes = responses.map(raw => raw.toString('binary'));
+
 	// console.log(strRes.join(''));
 	
 	// FS.writeFile('test.jpg', buffer, 'binary');
-	//console.log(SESSION.config);
-	//console.log(DEVICE.config);
+	// console.log(SESSION.config);
+	// console.log(DEVICE.config);
 
-	
 	createServer();
 	createSocket();
+
+	if(CONF.showreel) {
+
+		SHOWREEL.init({
+			delay: CONF.showreel
+		});
+
+	}
 }
 
 init();
