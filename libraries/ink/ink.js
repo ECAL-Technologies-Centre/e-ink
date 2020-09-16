@@ -5,7 +5,7 @@ const Ink = {
 
     //server
     id: 'anonymous', //default id/name
-    host: '192.168.2.1',
+    host: '10.192.149.126',
     port: 3000,
 
     clear: true, //Remove ghosting of previous client.
