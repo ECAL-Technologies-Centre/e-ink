@@ -8,7 +8,7 @@ const Clock = (function() {
             date: new Date(),
             trueTime: false,
 
-            fontSrc: 'https://gitcdn.xyz/repo/ECAL-Technologies-Centre/e-ink/master/libraries/clock/rsrc/font.png'
+            fontSrc: 'https://ecal-technologies-centre.github.io/e-ink/libraries/clock/rsrc/font.png'
         },
         dom = {};
 
