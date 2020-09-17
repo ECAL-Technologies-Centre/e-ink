@@ -7,7 +7,7 @@
 	- **empty_p5**: Ready to be used with p5.js.
 	- **empty**: Ready to be used with vanilla htmlCanvas or other canvas libraries.
 	- **ball**: Simple example running on p5.js.
-2. Connect to the WiFi **ct-zotac-2**. Password: **ecalecal**.
+2. Connect to the WiFi **ct-zotac-2** from the Tech Center. Password: **ecalecal**.
 3. Uncomment the line `Ink.connect ...` in the **sketch.js** file.
 4. Run your example folder on a [localhost](https://flaviocopes.com/local-web-server/ "localhost").
 5. ???
