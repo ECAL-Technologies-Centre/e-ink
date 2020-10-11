@@ -11,8 +11,8 @@ const Clock = (function () {
       date: new Date(),
       trueTime: false,
       fontSrc: `${config.location}/e-ink/libraries/clock/rsrc/font.png`,
-    },
-    dom = {};
+    };
+  const dom = {};
 
   window.addEventListener(
     "load",
