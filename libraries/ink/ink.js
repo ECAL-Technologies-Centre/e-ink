@@ -1,11 +1,11 @@
 /*Version 0.4.1*/
-console.log('Running Ink.js v0.4.1');
+console.log('Running Ink.js v0.4.2');
 
 const Ink = {
 
     //server
     id: 'anonymous', //default id/name
-    host: '10.192.149.126',
+    host: '192.168.137.1',
     port: 3000,
 
     clear: true, //Remove ghosting of previous client.
@@ -67,7 +67,7 @@ const Ink = {
             this._resume();
             this.socket = undefined;
 
-            alert('Now running offline. \nTry to refresh\nOR\nDon\'t connect by commenting the line "Ink.connect...".');
+            console.warn('Now running offline. \nTry to refresh\nOR\nDon\'t connect by commenting the line "Ink.connect...".');
         }
 
         this.socket.onerror = e => {
@@ -76,6 +76,7 @@ const Ink = {
             
             console.error('Cannot connect to server!');
         }
+
     },
 
     async message(action, options) {
@@ -92,12 +93,14 @@ const Ink = {
 
     capture(options) {
 
+        // console.log(this.options)
+
         if (!this.socket || this.idle)
             return;
 
         //added anti spam security
 
-        if(frameRate in window && Math.round(frameRate()) !== 1)
+        if('frameRate' in window && typeof frameRate === 'function' && Math.round(frameRate()) !== 1)
             frameRate(1);
 
         this.setOptions(options);
