@@ -1,16 +1,17 @@
 import * as THREE from "https://unpkg.com/three/build/three.module.js";
 
-var camera, scene, renderer;
-var mesh;
+let camera, scene, renderer;
+let mesh;
 
-var width = 2560;
-var height = 1440;
-var framesPerSecond = 1;
+const width = 2560;
+const height = 1440;
+const framesPerSecond = 1;
 
 init();
 
-var interval;
+let interval;
 function startInterval() {
+  clearInterval(interval);
   interval = setInterval(animate, 1000 / framesPerSecond);
 }
 
@@ -26,12 +27,8 @@ function init() {
     invert: false, //invert frame: removes ghosting
     dimensions: [width, height], //portrait orientation: [1440, 2560]
     context: renderer.getContext(),
-    loop: () => {
-      startInterval();
-    },
-    noLoop: () => {
-      clearInterval(interval);
-    },
+    loop: () => {startInterval()}, //custom function to restart the loop,
+    noLoop: () => {clearInterval(interval)};//custom function to end the loop
   };
 
   Ink.connect({ id: "Cube ThreeJS", options: inkOptions }); //connect to eInk via a server to display image
@@ -41,8 +38,8 @@ function init() {
 
   scene = new THREE.Scene();
 
-  var geometry = new THREE.BoxBufferGeometry(200, 200, 200);
-  var material = new THREE.MeshDepthMaterial();
+  let geometry = new THREE.BoxBufferGeometry(200, 200, 200);
+  let material = new THREE.MeshDepthMaterial();
 
   mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
