@@ -7,11 +7,12 @@ const width = 2560;
 const height = 1440;
 const framesPerSecond = 1;
 
-init();
 
 let interval;
+init();
+
 function startInterval() {
-  clearInterval(interval);
+  if (interval) clearInterval(interval);
   interval = setInterval(animate, 1000 / framesPerSecond);
 }
 
@@ -27,8 +28,13 @@ function init() {
     invert: false, //invert frame: removes ghosting
     dimensions: [width, height], //portrait orientation: [1440, 2560]
     context: renderer.getContext(),
-    loop: () => {startInterval()}, //custom function to restart the loop,
-    noLoop: () => {clearInterval(interval)};//custom function to end the loop
+    loop: () => {
+      startInterval();
+    }, //custom function to restart the loop,
+    noLoop: () => {
+      clearInterval(interval)
+      // if (interval) clearInterval(interval);
+    }, //custom function to end the loop
   };
 
   Ink.connect({ id: "Cube ThreeJS", options: inkOptions }); //connect to eInk via a server to display image
