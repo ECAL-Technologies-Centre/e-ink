@@ -1,4 +1,4 @@
-let cv, ctx, frameRate = 1, interval;
+let cv, ctx, framesPerSecond = 1, interval;
 
 window.addEventListener('load', setup);
 function setup() {
@@ -31,8 +31,8 @@ function createCanvas(width, height) {
 }
 
 function loop() {
-    draw();
-    interval = setInterval(draw, 1000/frameRate);
+  if (interval) clearInterval(interval);
+  interval = setInterval(animate, 1000 / framesPerSecond);
 }
 
 function noLoop() {
