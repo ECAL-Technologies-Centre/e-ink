@@ -1,12 +1,21 @@
 # e-ink
 
+### Contents
+- [Getting Started](#getting-started)
+- [Ink.js](#inkjs)
+- [Clock.js](#clockjs)
+- [Troubleshoot](#troubleshoot)
+---
+
 ## Getting Started
 
+### Examples to download
+- **[p5-template](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ECAL-Technologies-Centre/e-ink/blob/master/examples/p5-template)**: Ready to be used with p5.js.
+- **[vanilla-template](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ECAL-Technologies-Centre/e-ink/blob/master/examples/vanilla-template)**: Ready to be used with vanilla htmlCanvas or other canvas libraries.
+- **[p5-ball](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ECAL-Technologies-Centre/e-ink/blob/master/examples/p5-ball)**: Simple example running on p5.js.
+
 ### Running a sketch on the Visionect Display
-1. Download one of the example folders of the repository:
-	- **[p5-template](/examples/p5-template)**: Ready to be used with p5.js.
-	- **[vanilla-template](/examples/vanilla-template)**: Ready to be used with vanilla htmlCanvas or other canvas libraries.
-	- **[p5-ball](/examples/p5-ball)**: Simple example running on p5.js.
+1. Download an example.
 2. Connect to the WiFi **ct-zotac-2** from the Tech Center. Password: **ecalecal**.
 3. Uncomment the line `Ink.connect ...` in the **sketch.js** file.
 4. Run your example folder on a [localhost](https://flaviocopes.com/local-web-server/ "localhost").
@@ -122,7 +131,7 @@ Clock is an object built on top of the `Date` object. Clock keeps updating the `
 **false**: Default value. You have to manually update the Clock using the `Clock.tick()` method.\
 **true**: Clock will always be set to the clock of your computer. It will be updated when you call any of the Clock methods.
 
-**`Clock.onSecondChange` Function`**\
+**`Clock.onSecondChange` Function**\
 Will be called on each minutes.\
 Example:
 ```javascript
@@ -130,10 +139,10 @@ Clock.onSecondChange = function(value) {
 	console.log('New second: ' + value);
 }
 ```
-**`Clock.onMinuteChange` Function**
+**`Clock.onMinuteChange` Function**\
 Will be called on each seconds.
 
-**`Clock.onHourChange` Function**
+**`Clock.onHourChange` Function**\
 Will be called on each hours.
 
 ### Methods
