@@ -13,6 +13,7 @@
 - **[p5-template](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ECAL-Technologies-Centre/e-ink/blob/master/examples/p5-template)**: Ready to be used with p5.js.
 - **[vanilla-template](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ECAL-Technologies-Centre/e-ink/blob/master/examples/vanilla-template)**: Ready to be used with vanilla htmlCanvas or other canvas libraries.
 - **[p5-ball](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ECAL-Technologies-Centre/e-ink/blob/master/examples/p5-ball)**: Simple example running on p5.js.
+- **[p5-clock](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ECAL-Technologies-Centre/e-ink/blob/master/examples/p5-clock)**: Examples of dependant animation based on time, using Clock.js.
 
 ### Running a sketch on the Visionect Display
 1. Download an example.
