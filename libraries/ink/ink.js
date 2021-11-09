@@ -1,5 +1,5 @@
-/*Version 0.4.3*/
-console.log('Running Ink.js v0.4.3');
+/*Version 0.4.4*/
+console.log('Running Ink.js v0.4.4');
 
 const Ink = {
 
@@ -39,7 +39,7 @@ const Ink = {
 
         let headers = btoa(JSON.stringify({ id: this.id }));
 
-        this.socket = new WebSocket(`ws://0.0.0.0:${this.port}/?${headers}`);
+        this.socket = new WebSocket(`ws://${this.host}:${this.port}/?${headers}`);
 
         this.connected = new Promise(resolve => this.resolveConnection = resolve);
 
