@@ -883,7 +883,7 @@ function createServer() {
 		});
 	});
 
-	SERVER.listen(CONF.port);
+	SERVER.listen(CONF.port, "0.0.0.0");
 
 	console.log(`Server running on "${getIPAddress()}:${CONF.port}"`);
 
