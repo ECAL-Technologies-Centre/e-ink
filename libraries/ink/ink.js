@@ -1,5 +1,5 @@
-/*Version 0.4.1*/
-console.log('Running Ink.js v0.4.2');
+/*Version 0.4.3*/
+console.log('Running Ink.js v0.4.3');
 
 const Ink = {
 
