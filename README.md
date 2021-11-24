@@ -17,7 +17,7 @@
 
 ### Running a sketch on the Visionect Display
 1. Download an example.
-2. Connect to the WiFi **ct-zotac-2** from the Tech Center. Password: **ecalecal**.
+2. Connect to the WiFi **eInk** from the Tech Center. Password: **ecalecal**.
 3. Uncomment the line `Ink.connect ...` in the **sketch.js** file.
 4. Run your example folder on a [localhost](https://flaviocopes.com/local-web-server/ "localhost").
 5. ???
