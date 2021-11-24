@@ -32,7 +32,7 @@
 3. Click outside the digits to close the popup.
 
 ### Running multiple sketches with the *Visionect Sketch Selector*
-1. Use the PC **zotac-2**. Open [localhost:3000](http://localhost:3000) on Chrome.
+1. Use the PC **zotac** hooked to the eInk. Open [localhost:3600](http://localhost:3600) on Chrome.
 2. Select the sketch you want to display on the e-paper.
 
 ------------
@@ -52,7 +52,7 @@ IP address of the server *Visionect Sketch Selector*.\
 
 **`Ink.port` Int**\
 Port on which the server *Visionect Sketch Selector* is running.\
-**3000**: Default value.
+**3600**: Default value.
 
 **`Ink.options.dimensions` [ Int, Int ]**\
 Dimensions of the Visionect Display. This is also the size of your htmlCanvas.\
