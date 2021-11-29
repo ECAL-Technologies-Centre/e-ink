@@ -1,210 +1,213 @@
 /*Version 0.4.4*/
-console.log('Running Ink.js v0.4.4');
+console.log('Running Ink.js v0.4.5')
 
 const Ink = {
+  //server
+  id: 'anonymous', //default id/name
+  host: '192.168.8.103',
+  port: 3600,
 
-    //server
-    id: 'anonymous', //default id/name
-    host: '192.168.8.103',
-    port: 3600,
+  clear: true, //Remove ghosting of previous client.
 
-    clear: true, //Remove ghosting of previous client.
+  defDims: [2560, 1440],
 
-    defDims: [2560, 1440],
+  options: {
+    dimensions: [2560, 1440], //[2560, 1440], [1440, 2560]
+    dither: 'bayer', //'bayer', 'none', 'floyd-steinberg'
+    bit: 1, //1 , 4
+    invert: false, //true, false
+    optimize: true, //true, false
+    partial: true, //true, false
+    loop: () => loop(),
+    noLoop: () => noLoop(),
+    orientation: 'left', //left or right
+  },
 
-    options: {
-        dimensions: [2560, 1440], //[2560, 1440], [1440, 2560]
-        dither: 'bayer', //'bayer', 'none', 'floyd-steinberg'
-        bit: 1, //1 , 4
-        invert: false, //true, false
-        optimize: true, //true, false
-        partial: true, //true, false
-        loop: () => loop(),
-        noLoop: () => noLoop(),
-        orientation: 'left', //left or right
-    },    
+  connected: false,
+  idle: true,
 
-    connected: false,
-    idle: true,
+  connect(connectParams = { options: {} }) {
+    connectParams.options = Object.assign(this.options, connectParams.options)
 
-    connect(connectParams = {options: {}}) {
+    Object.assign(this, connectParams)
 
-        connectParams.options = Object.assign(this.options, connectParams.options);
+    //rotation fix
+    this.lockRotation()
+    this.initOffscreenCanvas()
 
-        Object.assign(this, connectParams);
+    let headers = btoa(JSON.stringify({ id: this.id }))
 
-        //rotation fix
-        this.lockRotation();
-        this.initOffscreenCanvas();
+    document.title = this.id
 
-        let headers = btoa(JSON.stringify({ id: this.id }));
+    this.socket = new WebSocket(`ws://${this.host}:${this.port}/?${headers}`)
 
-        this.socket = new WebSocket(`ws://${this.host}:${this.port}/?${headers}`);
+    this.connected = new Promise(
+      (resolve) => (this.resolveConnection = resolve)
+    )
 
-        this.connected = new Promise(resolve => this.resolveConnection = resolve);
+    this._pause()
 
-        this._pause();
+    window.addEventListener('beforeunload', (e) => {
+      this.socket.close()
+      return
+    })
 
-        window.addEventListener('beforeunload', (e) => {
-            this.socket.close();
-            return;
-        });
+    this.socket.onopen = (e) => {
+      this.resolveConnection()
+      console.log('You are now connected to the server')
+    }
 
-        this.socket.onopen = e => {
-            this.resolveConnection();
-            console.log('You are now connected to the server');
-        }
+    this.socket.onmessage = (e) => {
+      const msg = JSON.parse(e.data)
 
-        this.socket.onmessage = e => {
+      this['_' + msg.type](msg.data)
+    }
 
-            let msg = JSON.parse(e.data);
+    this.socket.onclose = (e) => {
+      //this._pause();
+      this._resume()
+      this.socket = undefined
 
-            this['_' + msg.type](msg.data);
-        }
+      console.warn(
+        'Now running offline. \nTry to refresh\nOR\nDon\'t connect by commenting the line "Ink.connect...".'
+      )
+    }
 
-        this.socket.onclose = e => {
-            //this._pause();
-            this._resume();
-            this.socket = undefined;
+    this.socket.onerror = (e) => {
+      //this._pause();
+      this.socket = undefined
 
-            console.warn('Now running offline. \nTry to refresh\nOR\nDon\'t connect by commenting the line "Ink.connect...".');
-        }
+      console.error('Cannot connect to server!')
+    }
+  },
 
-        this.socket.onerror = e => {
-            //this._pause();
-            this.socket = undefined;
-            
-            console.error('Cannot connect to server!');
-        }
+  async message(action, options) {
+    if (!this.socket) return
 
-    },
+    await this.connected
 
-    async message(action, options) {
-        if (!this.socket)
-            return;
+    this.socket.send(
+      JSON.stringify({
+        type: action,
+        data: options,
+      })
+    )
+  },
 
-        await this.connected;
+  capture(options) {
+    // console.log(this.options)
 
-        this.socket.send(JSON.stringify({
-            type: action,
-            data: options
-        }));
-    },
+    if (!this.socket || this.idle) return
 
-    capture(options) {
+    //added anti spam security
 
-        // console.log(this.options)
+    if (
+      'frameRate' in window &&
+      typeof frameRate === 'function' &&
+      Math.round(frameRate()) !== 1
+    )
+      frameRate(1)
 
-        if (!this.socket || this.idle)
-            return;
+    this.setOptions(options)
 
-        //added anti spam security
+    this._pause()
 
-        if('frameRate' in window && typeof frameRate === 'function' && Math.round(frameRate()) !== 1)
-            frameRate(1);
+    let context =
+      this.options.context ||
+      (window._renderer && window._renderer.drawingContext)
 
-        this.setOptions(options);
+    this.applyImage(context)
+    this.applyFrameIndicator()
 
-        this._pause();
+    // context.drawImage(img, 0,0);
 
-        let context = this.options.context || (window._renderer && window._renderer.drawingContext);
+    const currOptions = Object.assign({}, this.options)
 
-        
-        this.applyImage(context);
-        this.applyFrameIndicator();
+    if (this.clear) {
+      currOptions.invert = true
+      this.clear = false
+    }
 
-        // context.drawImage(img, 0,0);
+    this.message('capture', {
+      dataURI: this.offCtx.canvas.toDataURL('image/png'),
+      options: currOptions,
+    })
+  },
 
-        const currOptions = Object.assign({}, this.options);
+  applyFrameIndicator() {
+    let c = this.offCtx
+    let cv = c.canvas
+    let millis = Date.now()
+    let binary = millis.toString(2)
 
-        if(this.clear) {
-            currOptions.invert = true;
-            this.clear = false;
-        }
+    c.save()
+    c.translate(0, cv.height - 1)
+    //draw background
+    c.fillStyle = 'black'
+    c.fillRect(0, 0, binary.length, 1)
+    c.fillStyle = 'white'
+    //draw squares
+    for (let i = 0; i < binary.length; i++) {
+      if (binary[i] === '1') c.fillRect(i, 0, 1, 1)
+    }
 
-        this.message('capture', { dataURI: this.offCtx.canvas.toDataURL('image/png'), options: currOptions });
-    },
+    c.restore()
+  },
 
-    applyFrameIndicator() {
-        let c = this.offCtx;
-        let cv = c.canvas;
-        let millis = Date.now();
-        let binary = millis.toString(2);
+  applyImage(ctx) {
+    let c = this.offCtx
+    let cv = c.canvas
 
-        c.save();
-        c.translate(0, cv.height-1);
-        //draw background
-        c.fillStyle = 'black';
-        c.fillRect(0,0,binary.length, 1);
-        c.fillStyle = 'white';
-        //draw squares
-        for(let i = 0; i < binary.length; i++) {
+    c.save()
 
-            if(binary[i] === '1')
-                c.fillRect(i,0,1,1);
-        }
+    c.translate(cv.width / 2, cv.height / 2)
 
-        c.restore();
-    },
+    //force image rotation
+    if (ctx.canvas.width < ctx.canvas.height) {
+      let angle = ((this.options.orientation === 'left' ? 1 : -1) * Math.PI) / 2
+      c.rotate(angle)
+    }
 
-    applyImage(ctx) {
+    c.translate(-ctx.canvas.width / 2, -ctx.canvas.height / 2)
 
-        let c = this.offCtx;
-        let cv = c.canvas;
+    c.drawImage(ctx.canvas, 0, 0)
 
-        c.save();
+    c.restore()
 
-        c.translate(cv.width/2, cv.height/2);
+    return c.canvas
+  },
 
-        //force image rotation
-        if(ctx.canvas.width < ctx.canvas.height) {    
-            let angle = (this.options.orientation === 'left' ? 1 : -1) * Math.PI/2;
-            c.rotate(angle);
-        }
+  setOptions(options = {}) {
+    Object.assign(this.options, options)
+    this.lockRotation()
+  },
 
-        c.translate(-ctx.canvas.width/2, -ctx.canvas.height/2);
+  lockRotation() {
+    this.options.dimensions = this.defDims
+  },
 
-        c.drawImage(ctx.canvas, 0, 0);
+  initOffscreenCanvas() {
+    let canvas = document.createElement('canvas')
+    this.offCtx = canvas.getContext('2d')
 
-        c.restore();
+    ;[canvas.width, canvas.height] = this.defDims
+  },
 
-        return c.canvas;
-    },
+  _start(e) {
+    this.clear = true
+    //resume draw loop
+    this._resume(e)
+  },
 
-    setOptions(options = {}) {
-        Object.assign(this.options, options);
-        this.lockRotation();
-    },
+  _resume(e) {
+    this.idle = false
+    //resume draw loop
+    this.options.loop()
+  },
 
-    lockRotation() {
-        this.options.dimensions = this.defDims;
-    },
-
-    initOffscreenCanvas() {
-        let canvas = document.createElement('canvas');
-        this.offCtx = canvas.getContext('2d');
-
-        [canvas.width , canvas.height ] = this.defDims;
-    },
-
-    _start(e) {
-
-        this.clear = true;
-        //resume draw loop
-        this._resume(e);
-    },
-
-    _resume(e) {
-
-        this.idle = false;
-        //resume draw loop
-        this.options.loop();
-    },
-
-    _pause() {
-        this.idle = true;
-        //stop draw loop
-        this.options.noLoop();
-    },
-
+  _pause() {
+    this.idle = true
+    //stop draw loop
+    this.options.noLoop()
+  },
 }

@@ -1,1012 +1,1014 @@
-'use strict';
+'use strict'
 
-const WEBSOCKET = require('ws');
-const CRYPTO = require('crypto');
-const FORMDATA = require('form-data');
-const HTTP = require('http');
-const FS = require('fs');
-const OS = require('os');
-const UTIL = require('util');
+const WEBSOCKET = require('ws')
+const CRYPTO = require('crypto')
+const FORMDATA = require('form-data')
+const HTTP = require('http')
+const FS = require('fs')
+const OS = require('os')
+const UTIL = require('util')
 
-let SERVER;
-let WS;
+let SERVER
+let WS
 
 //Default values are overwritten if config.json file exists.
 //As an example, use the command "node server.js -port 3333 -host localhost" to set new values.
 
 const CONF = {
-	"offline": true,
-	"showreel": "10s", //false or interval: ex: "10s", "20m", "1h". If the unit omitted, default in second
-	"port":3000,
-	"uuid":"22002700-0551-3730-3234-393600000000",
-	"host":"localhost",
-	"key":"eb1fac7a835ddcf2",
-	"secret":"zbXDQjeuhxOPuAnv7EW9PvFxnQ4f3TbGgB0VfeaGabg",
-	"comparedelay":50,
-	"autoConnect": true,
+  offline: true,
+  showreel: '10s', //false or interval: ex: "10s", "20m", "1h". If the unit omitted, default in second
+  port: 3000,
+  uuid: '22002700-0551-3730-3234-393600000000',
+  host: 'localhost',
+  key: 'eb1fac7a835ddcf2',
+  secret: 'zbXDQjeuhxOPuAnv7EW9PvFxnQ4f3TbGgB0VfeaGabg',
+  comparedelay: 50,
+  autoConnect: true,
 }
 
 const SHOWREEL = {
+  maps: {
+    ms: 1,
+    s: 1000,
+    m: 1000 * 60,
+    h: 1000 * 60 * 60,
+  },
 
-	maps: {
-		"ms": 1,
-		"s": 1000,
-		"m": 1000 * 60,
-		"h": 1000 * 60 * 60,
-	},
+  init(options) {
+    let defaults = {
+      delay: '10s',
+      trueTime: true,
+    }
 
-	init(options) {
+    Object.assign(this, defaults, options)
 
-		let defaults = {
-			delay: "10s",
-			trueTime: true,
-		}
+    if (this.delay === true) {
+      //set to default if delay is set to [true].
+      this.delay = defaults.delay
+    }
 
-		Object.assign(this, defaults, options);
+    //set time
 
-		if(this.delay === true) { //set to default if delay is set to [true].
-			this.delay = defaults.delay;
-		}
+    let delay_round = this.calcDelay(this.delay)
+    this.delay = delay_round.delay
+    this.lastUpdate = delay_round.lastUpdate
 
-		//set time
+    console.log(`Showreel initiated with an interval of ${this.delay}ms`)
 
-		let delay_round = this.calcDelay(this.delay);
-		this.delay = delay_round.delay;
-		this.lastUpdate = delay_round.lastUpdate;
+    //update frequency. faster delay -> more accurate clock
+    let intervalFreq = 1000 / 60
+    this.interval = setInterval(this.update.bind(this), intervalFreq)
+  },
 
-		console.log(`Showreel initiated with an interval of ${this.delay}ms`);
+  roundTime(millisDelay = 0) {
+    let currTime = Date.now()
+    let roundedTime = UTILS.floorRemainder(currTime, millisDelay)
+    return roundedTime
+  },
 
+  roundUnit(clock, unit) {
+    let currAmt = clock['get' + unit]()
+    let rounded = UTILS.floorRemainder(currAmt)
 
-		//update frequency. faster delay -> more accurate clock
-		let intervalFreq = 1000/60;
-		this.interval = setInterval(this.update.bind(this), intervalFreq);
-	},
+    console.log(unit, currAmt, rounded)
 
-	roundTime(millisDelay = 0) {
-		let currTime = Date.now();
-		let roundedTime = UTILS.floorRemainder(currTime, millisDelay);
-		return roundedTime;
-	},
+    clock['set' + unit](rounded)
+  },
 
-	roundUnit(clock, unit) {
-		let currAmt = clock['get'+unit]();
-		let rounded = UTILS.floorRemainder(currAmt);
+  calcDelay(delay_unit) {
+    let delayData = delay_unit
+    let delay = parseFloat(delayData)
+    let unit = delayData.replace(delay, '') || 's'
+    let millisDelay = delay * this.maps[unit]
+    let lastUpdate = this.roundTime(millisDelay, unit) // mapping delay
 
-		console.log(unit, currAmt, rounded);
+    return {
+      delay: millisDelay,
+      lastUpdate: lastUpdate,
+    }
+  },
 
-		clock['set'+unit](rounded);
-	},
+  update() {
+    let currTime = Date.now()
+    let deltaTime = this.lastUpdate + this.delay - currTime
 
-
-	calcDelay(delay_unit) {
-
-		let delayData = delay_unit;
-		let delay = parseFloat(delayData);
-		let unit = delayData.replace(delay, '') || 's';
-		let millisDelay = delay * this.maps[unit];
-		let lastUpdate = this.roundTime(millisDelay, unit); // mapping delay
-
-		return {
-			delay: millisDelay,
-			lastUpdate: lastUpdate
-		}
-	},
-
-	update() {
-
-		let currTime = Date.now();
-		let deltaTime = (this.lastUpdate + this.delay) - currTime;
-
-		if(deltaTime <= 0) {
-
-			CLIENTS.cycle();
-			this.lastUpdate = currTime + deltaTime;
-			
-		}
-	},
-
-
+    if (deltaTime <= 0) {
+      CLIENTS.cycle()
+      this.lastUpdate = currTime + deltaTime
+    }
+  },
 }
 
-
 const ADMIN = {
+  //variables
+  connected: false,
+  socket: undefined,
 
-	//variables
-	connected: false,
-	socket: undefined,
+  //do calls
+  actions: {
+    selectClient: function (id) {
+      console.log('client selected: ' + id)
+      CLIENTS.select(id)
+    },
+  },
 
-	//do calls
-	actions: {
-		"selectClient": function(id) {
-			console.log('client selected: ' + id);
-			CLIENTS.select(id);
-		}
-	},
+  //methods
+  getSimplifiedClientList() {
+    let clientArray = Array.from(CLIENTS.list.values()) //send to admin which clients are online
+    let simplifiedArray = clientArray.map((client) =>
+      CLIENTS.simplifyClientObject(client)
+    )
 
-	//methods
-	getSimplifiedClientList() {
+    console.log('Current client list: ', simplifiedArray)
 
-		let clientArray = Array.from(CLIENTS.list.values());//send to admin which clients are online
-		let simplifiedArray = clientArray.map(client => CLIENTS.simplifyClientObject(client));
+    return simplifiedArray
+  },
 
-		console.log('Current client list: ', simplifiedArray);
+  setup(socket, req) {
+    CLIENTS.pauseClient(CLIENTS.currClient)
 
-		return simplifiedArray;
-	},
+    if (this.connected) return socket.close()
 
-	setup(socket, req) {
+    console.log('Admin UI connected.')
 
-		CLIENTS.pauseClient(CLIENTS.currClient);
+    this.socket = socket
+    this.connected = true
 
-		if (this.connected)
-			return socket.close();
+    UTILS.sendMessage(this, 'clientsList', this.getSimplifiedClientList())
 
-		console.log('Admin UI connected.');
+    socket.on('message', (rawData) => {
+      let msg = JSON.parse(rawData)
+      this.do(msg.type, msg.data)
+    })
 
-		this.socket = socket;
-		this.connected = true;
+    socket.on('close', (rawData) => {
+      console.log('Admin UI disconnected.')
+      this.connected = false
 
-		UTILS.sendMessage(this, 'clientsList', this.getSimplifiedClientList());
+      CLIENTS.disconnectAll()
 
-		socket.on('message', rawData => {
-			let msg = JSON.parse(rawData);
-			this.do(msg.type, msg.data);
-		});
+      //disconnect all clients
+    })
+  },
 
-		socket.on('close', rawData => {
-			console.log('Admin UI disconnected.');
-			this.connected = false;
-
-			CLIENTS.disconnectAll();
-			
-			//disconnect all clients
-
-		});
-	},
-
-	do(action, data) {
-		if(action in this.actions) {
-			this.actions[action].call(this, data);
-		} else {
-			console.log(`ADMIN.actions ["${action}] is not defined"`);
-		}
-	},
+  do(action, data) {
+    if (action in this.actions) {
+      this.actions[action].call(this, data)
+    } else {
+      console.log(`ADMIN.actions ["${action}] is not defined"`)
+    }
+  },
 }
 
 const ENCRYPT = {
-	header(verb, path, headers) {
-		let date = new Date().toUTCString();
+  header(verb, path, headers) {
+    let date = new Date().toUTCString()
 
-		let auth = CRYPTO.createHmac('sha256', CONF.secret)
-		.update(UTIL.format('%s\n%s\n%s\n%s\n%s', verb, '', headers['content-type'], date, path))
-		.digest('base64');
+    let auth = CRYPTO.createHmac('sha256', CONF.secret)
+      .update(
+        UTIL.format(
+          '%s\n%s\n%s\n%s\n%s',
+          verb,
+          '',
+          headers['content-type'],
+          date,
+          path
+        )
+      )
+      .digest('base64')
 
-		headers.Date = date;
-		headers.Authorization = UTIL.format('%s:%s', CONF.key, auth);
+    headers.Date = date
+    headers.Authorization = UTIL.format('%s:%s', CONF.key, auth)
 
-		return headers;
+    return headers
+  },
 
+  request(method, callback) {
+    let headers = { 'content-type': 'application/json' },
+      date = new Date().toUTCString(),
+      path = '/api/device/' + CONF.uuid,
+      verb = 'PUT'
 
-	},
+    let auth = CRYPTO.createHmac('sha256', CONF.secret)
+      .update(
+        UTIL.format(
+          '%s\n%s\n%s\n%s\n%s',
+          verb,
+          '',
+          headers['content-type'],
+          date,
+          path
+        )
+      )
+      .digest('base64')
 
-	request(method, callback) {
-		let headers = { "content-type": 'application/json' },
-		date = new Date().toUTCString(),
-		path = '/api/device/' + CONF.uuid,
-		verb = 'PUT';
+    headers.Date = date
+    headers.Authorization = UTIL.format('%s:%s', CONF.key, auth)
 
-		let auth = CRYPTO.createHmac('sha256', CONF.secret)
-		.update(UTIL.format('%s\n%s\n%s\n%s\n%s', verb, '', headers['content-type'], date, path))
-		.digest('base64');
+    let request = HTTP.request(
+      {
+        method: verb,
+        host: CONF.host,
+        port: 8081,
+        path: path,
+        headers: headers,
+      },
+      callback
+    )
 
-		headers.Date = date;
-		headers.Authorization = UTIL.format('%s:%s', CONF.key, auth);
-
-		let request = HTTP.request({
-
-			method: verb,
-			host: CONF.host,
-			port: 8081,
-			path: path,
-			headers: headers
-
-		}, callback);
-
-		return request;
-
-	}
-
+    return request
+  },
 }
 
 const DEVICE = {
+  config: undefined,
 
-	config: undefined,
+  liveView: undefined,
 
-	liveView: undefined,
-	
-	async retrieveConfig() {
+  async retrieveConfig() {
+    if (isOffline()) return
 
-		if(isOffline())
-			return;
+    this.config = await this.getConfig().catch((e) => console.error(e))
+    console.log('Device config retrieved!')
+  },
 
-		this.config = await this.getConfig().catch(e => console.error(e));
-		console.log('Device config retrieved!');
-	},
+  sendImage(dataURI) {
+    return new Promise((resolve, reject) => {
+      let form = new FORMDATA()
 
-	sendImage(dataURI) {
-		return new Promise((resolve, reject) => {
+      form.append('image', Buffer.from(dataURI.split(',')[1], 'base64'), {
+        filename: 'image.png',
+      })
 
-			let form = new FORMDATA();
+      let headers = form.getHeaders()
+      let path = UTIL.format('/backend/%s', CONF.uuid)
+      let verb = 'PUT'
 
-			form.append('image', Buffer.from(dataURI.split(',')[1], 'base64'), { filename: 'image.png' });
+      headers = ENCRYPT.header(verb, path, headers)
 
-			let headers = form.getHeaders();
-			let path = UTIL.format('/backend/%s', CONF.uuid);
-			let verb = 'PUT';
+      let request = HTTP.request({
+        method: verb,
+        host: CONF.host,
+        port: 8081,
+        path: path,
+        headers: headers,
+      })
 
-			headers = ENCRYPT.header(verb, path, headers);
-
-			let request = HTTP.request({
-				method: verb,
-				host: CONF.host,
-				port: 8081,
-				path: path,
-				headers: headers
-			});
-
-			request.on('response', function(res) {
-
-				if (res.statusCode != 200)
-					reject(res);
-
-				res.on('data', function(chunk) {
-					resolve(chunk);
-				});
-
-			});
-
-			form.pipe(request);
-
-		});
-	},
-
-	getConfig() {
-
-		return new Promise((resolve, reject) => {
-
-			let form = new FORMDATA();
-
-			let response = '';
-
-			let headers = { "content-type": 'application/json' },
-			date = new Date().toUTCString(),
-			path = '/api/device/' + CONF.uuid,
-			verb = 'GET';
-
-			let auth = CRYPTO.createHmac('sha256', CONF.secret)
-			.update(UTIL.format('%s\n%s\n%s\n%s\n%s', verb, '', headers['content-type'], date, path))
-			.digest('base64');
-
-			headers.Date = date;
-			headers.Authorization = UTIL.format('%s:%s', CONF.key, auth);
-
-			let request = HTTP.request({
-				method: verb,
-				host: CONF.host,
-				port: 8081,
-				path: path,
-				headers: headers
-			}, res => {
-				// console.log(`statusCode: ${res.statusCode}`);
-
-				res.on('data', d => {
-					response += d.toString();
-				})
-
-				res.on('end', _ => {
-					resolve(response);
-				})
-			});
-
-			request.on('error', error => {
-				reject(error);
-			})
-
-			request.end();
-		});
-	},
-
-	async retrieveLiveView() {
-
-		this.liveView = await DEVICE.getLiveView().catch(e => console.log('Error getting the liveView'));
-		console.log('Live view initiated!');
-
-	},
-
-	getLiveView() {
-
-		return new Promise((resolve, reject) => {
-
-			let responses = '';
-
-			let form = new FORMDATA();
-
-			let headers = { "content-type": 'application/octet-stream' },
-			date = new Date().toUTCString(),
-			path = '/api/live/device/' + CONF.uuid + '/image',
-			verb = 'GET';
-
-			let auth = CRYPTO.createHmac('sha256', CONF.secret)
-			.update(UTIL.format('%s\n%s\n%s\n%s\n%s', verb, '', headers['content-type'], date, path))
-			.digest('base64');
-
-			headers.Date = date;
-			headers.Authorization = UTIL.format('%s:%s', CONF.key, auth);
-
-			let request = HTTP.request({
-				method: verb,
-				gzip: true,
-				host: CONF.host,
-				port: 8081,
-				path: path,
-				headers: headers
-			}, res => {
-				// console.log(`statusCode: ${res.statusCode}`);
-
-				res.on('data', d => {
-					responses += d.toString('hex');
-				});
-
-				res.on('end', d => {
-					// console.log(responses);
-					resolve(responses);
-				});
-			});
-
-			// request.setEncoding('binary');
-
-			request.on('error', error => {
-				reject(error);
-			})
-
-			request.end();
-		});
-	},
-
-	async liveViewUpdated() {
-
-		let oldView = DEVICE.liveView,
-		newView,
-		interval = CONF.comparedelay;
-
-		while(true) {
-			
-			newView = await DEVICE.getLiveView();
-
-			if(oldView !== newView)
-				break;
-
-			await UTILS.delay(interval);
-
-			console.log('Same image...');
-
-		}
-
-		console.log('Image updated!!');
-		this.liveView = newView;
-		
-	},
-
-	mapConfig(options) {
-
-		let conf;
-
-		try {
-			conf = JSON.parse(this.config);
-		} catch (e) {
-			console.log('Failed to map config!!!');
-			return false;
-		}
-
-    	// conf.Options.MergeRegions = conf.Options.MergeRegions.replace('false', 'true');
-    	//horizontal
-    	if (options.dimensions[0] > options.dimensions[1]) {
-
-    		conf.Displays.forEach(d => {
-    			d.Rotation = 1;
-    			d.X = d.Height * d.ID;
-    			d.Y = 0;
-    		});
-
-        	//vertical
-        } else {
-
-        	conf.Displays.forEach(d => {
-        		d.Rotation = 2;
-        		d.X = 0;
-        		d.Y = d.Height * (conf.Displays.length - 1 - d.ID);
-        	});
+      request.on('response', function (res) {
+        if (res.statusCode != 200) {
+          reject(res)
+          return
         }
 
-        return JSON.stringify(conf);
-    },
+        resolve(res)
 
-    setConfig(options) {
-    	return new Promise((resolve, reject) => {
+        // res.on('data', function (chunk) {
+        //   resolve(chunk)
+        // })
+      })
 
-    		let data = this.mapConfig(options);
+      form.pipe(request)
+    })
+  },
 
-    		if (!this.config || data === this.config) {
-    			return resolve();
-    		}
+  getConfig() {
+    return new Promise((resolve, reject) => {
+      let form = new FORMDATA()
 
-    		this.config = data;
-    		console.log('Device parameters updated.');
+      let response = ''
 
-    		let request = ENCRYPT.request('PUT', res => resolve());
+      let headers = { 'content-type': 'application/json' },
+        date = new Date().toUTCString(),
+        path = '/api/device/' + CONF.uuid,
+        verb = 'GET'
 
-    		request.on('error', error => {
-    			console.log('error');
-    			console.log(error);
-            	resolve(); //or reject maybeh
-            });
+      let auth = CRYPTO.createHmac('sha256', CONF.secret)
+        .update(
+          UTIL.format(
+            '%s\n%s\n%s\n%s\n%s',
+            verb,
+            '',
+            headers['content-type'],
+            date,
+            path
+          )
+        )
+        .digest('base64')
 
-    		request.write(data);
-    		request.end();
-    	});
+      headers.Date = date
+      headers.Authorization = UTIL.format('%s:%s', CONF.key, auth)
+
+      let request = HTTP.request(
+        {
+          method: verb,
+          host: CONF.host,
+          port: 8081,
+          path: path,
+          headers: headers,
+        },
+        (res) => {
+          // console.log(`statusCode: ${res.statusCode}`);
+
+          res.on('data', (d) => {
+            response += d.toString()
+          })
+
+          res.on('end', (_) => {
+            resolve(response)
+          })
+        }
+      )
+
+      request.on('error', (error) => {
+        reject(error)
+      })
+
+      request.end()
+    })
+  },
+
+  async retrieveLiveView() {
+    this.liveView = await DEVICE.getLiveView().catch((e) =>
+      console.log('Error getting the liveView')
+    )
+    console.log('Live view initiated!')
+  },
+
+  getLiveView() {
+    return new Promise((resolve, reject) => {
+      let responses = ''
+
+      let form = new FORMDATA()
+
+      let headers = { 'content-type': 'application/octet-stream' },
+        date = new Date().toUTCString(),
+        path = '/api/live/device/' + CONF.uuid + '/image',
+        verb = 'GET'
+
+      let auth = CRYPTO.createHmac('sha256', CONF.secret)
+        .update(
+          UTIL.format(
+            '%s\n%s\n%s\n%s\n%s',
+            verb,
+            '',
+            headers['content-type'],
+            date,
+            path
+          )
+        )
+        .digest('base64')
+
+      headers.Date = date
+      headers.Authorization = UTIL.format('%s:%s', CONF.key, auth)
+
+      let request = HTTP.request(
+        {
+          method: verb,
+          gzip: true,
+          host: CONF.host,
+          port: 8081,
+          path: path,
+          headers: headers,
+        },
+        (res) => {
+          // console.log(`statusCode: ${res.statusCode}`);
+
+          res.on('data', (d) => {
+            responses += d.toString('hex')
+          })
+
+          res.on('end', (d) => {
+            // console.log(responses);
+            resolve(responses)
+          })
+        }
+      )
+
+      // request.setEncoding('binary');
+
+      request.on('error', (error) => {
+        reject(error)
+      })
+
+      request.end()
+    })
+  },
+
+  async liveViewUpdated() {
+    let oldView = DEVICE.liveView,
+      newView,
+      interval = CONF.comparedelay
+
+    while (true) {
+      newView = await DEVICE.getLiveView()
+
+      if (oldView !== newView) break
+
+      await UTILS.delay(interval)
+
+      console.log('Same image...')
     }
+
+    console.log('Image updated!!')
+    this.liveView = newView
+  },
+
+  mapConfig(options) {
+    let conf
+
+    try {
+      conf = JSON.parse(this.config)
+    } catch (e) {
+      console.log('Failed to map config!!!')
+      return false
+    }
+
+    // conf.Options.MergeRegions = conf.Options.MergeRegions.replace('false', 'true');
+    //horizontal
+    if (options.dimensions[0] > options.dimensions[1]) {
+      conf.Displays.forEach((d) => {
+        d.Rotation = 1
+        d.X = d.Height * d.ID
+        d.Y = 0
+      })
+
+      //vertical
+    } else {
+      conf.Displays.forEach((d) => {
+        d.Rotation = 2
+        d.X = 0
+        d.Y = d.Height * (conf.Displays.length - 1 - d.ID)
+      })
+    }
+
+    return JSON.stringify(conf)
+  },
+
+  setConfig(options) {
+    return new Promise((resolve, reject) => {
+      let data = this.mapConfig(options)
+
+      if (!this.config || data === this.config) {
+        return resolve()
+      }
+
+      this.config = data
+      console.log('Device parameters updated.')
+
+      let request = ENCRYPT.request('PUT', (res) => resolve())
+
+      request.on('error', (error) => {
+        console.log('error')
+        console.log(error)
+        resolve() //or reject maybeh
+      })
+
+      request.write(data)
+      request.end()
+    })
+  },
 }
 
 const SESSION = {
+  config: undefined,
 
-	config: undefined,
+  async retrieveConfig() {
+    if (isOffline()) return
 
-	async retrieveConfig() {
+    this.config = await this.getConfig().catch((e) =>
+      console.error('Get session config failed.')
+    )
+    console.log('Session config retrieved!')
+  },
 
-		if(isOffline())
-			return;
+  setConfig(options) {
+    return new Promise((resolve, reject) => {
+      let data = this.mapConfig(options)
 
-		this.config = await this.getConfig().catch(e => console.error("Get session config failed."));
-		console.log('Session config retrieved!');
+      if (!this.config || data === this.config) {
+        return resolve()
+      }
 
-	},
+      this.config = data
+      console.log('Session parameters updated.')
 
-	setConfig(options) {
-		return new Promise((resolve, reject) => {
+      let headers = { 'content-type': 'application/json' },
+        date = new Date().toUTCString(),
+        path = '/api/session',
+        verb = 'PUT'
 
-			let data = this.mapConfig(options);
+      let auth = CRYPTO.createHmac('sha256', CONF.secret)
+        .update(
+          UTIL.format(
+            '%s\n%s\n%s\n%s\n%s',
+            verb,
+            '',
+            headers['content-type'],
+            date,
+            path
+          )
+        )
+        .digest('base64')
 
-			if (!this.config || data === this.config) {
-				return resolve();
-			}
+      headers.Date = date
+      headers.Authorization = UTIL.format('%s:%s', CONF.key, auth)
 
-			this.config = data;
-			console.log('Session parameters updated.');
+      let request = HTTP.request(
+        {
+          method: verb,
+          host: CONF.host,
+          port: 8081,
+          path: path,
+          headers: headers,
+        },
+        (res) => {
+          // console.log(`statusCode: ${res.statusCode}`);
+          resolve()
+          // getSessionConfig();
+        }
+      )
 
-			let headers = { "content-type": 'application/json' },
-			date = new Date().toUTCString(),
-			path = '/api/session',
-			verb = 'PUT';
+      request.on('error', (error) => {
+        console.log(error)
+        resolve() //or reject maybeh
+      })
 
-			let auth = CRYPTO.createHmac('sha256', CONF.secret)
-			.update(UTIL.format('%s\n%s\n%s\n%s\n%s', verb, '', headers['content-type'], date, path))
-			.digest('base64');
+      request.write(data)
+      request.end()
+    })
+  },
 
-			headers.Date = date;
-			headers.Authorization = UTIL.format('%s:%s', CONF.key, auth);
+  getConfig() {
+    return new Promise((resolve, reject) => {
+      let form = new FORMDATA()
+      let headers = { 'content-type': 'application/json' }
+      let path = '/api/session'
+      let verb = 'GET'
+      let responses = ''
 
-			let request = HTTP.request({
-				method: verb,
-				host: CONF.host,
-				port: 8081,
-				path: path,
-				headers: headers
-			}, res => {
-	            // console.log(`statusCode: ${res.statusCode}`);
-	            resolve();
-	            // getSessionConfig();
-	        });
+      headers = ENCRYPT.header(verb, path, headers)
 
-			request.on('error', error => {
-				console.log(error);
-	            resolve(); //or reject maybeh
-	        });
+      let request = HTTP.request(
+        {
+          method: verb,
+          host: CONF.host,
+          port: 8081,
+          path: path,
+          headers: headers,
+        },
+        (res) => {
+          // console.log(`statusCode: ${res.statusCode}`);
+          res.on('data', (d) => {
+            // console.log(d.toString());
+            responses += d.toString()
+          })
 
-			request.write(data);
-			request.end();
-		});
-	},
+          res.on('end', (d) => {
+            // console.log(responses);
+            resolve(responses)
+          })
+        }
+      )
 
-	getConfig() {
-		return new Promise((resolve, reject) => {
+      request.on('error', (error) => {
+        reject(error)
+      })
 
-			let form = new FORMDATA();
-			let headers = { "content-type": 'application/json' };
-			let path = '/api/session';
-			let verb = 'GET';
-			let responses = '';
+      request.end()
+    })
+  },
 
-			headers = ENCRYPT.header(verb, path, headers);
+  mapConfig(changes) {
+    let lookupOpts = {
+      DefaultDithering: [
+        'dither',
+        { bayer: 'bayer', none: 'none', 'floyd-steinberg': 'floyd-steinberg' },
+      ],
+      DefaultEncoding: ['bit', { 1: '1', 4: '4' }],
+      RectangleFlags: ['invert', { false: '2', true: '0' }],
+      Beautify: ['optimize', { false: 'gamma=1.1', true: 'pretty,gamma=1.1' }],
+      ChangesAutodetect: [
+        'partial',
+        { false: 'false,threshold=0', true: 'true,threshold=0' },
+      ],
+    }
 
-			let request = HTTP.request({
-				method: verb,
-				host: CONF.host,
-				port: 8081,
-				path: path,
-				headers: headers
-			}, res => {
-	            // console.log(`statusCode: ${res.statusCode}`);
-	            res.on('data', d => {
-	                // console.log(d.toString());
-	                responses += d.toString();
-	            })
+    let opts = {
+      dither: 'bayer',
+      bit: 1,
+      invert: false,
+      optimize: false,
+      partial: false,
+    }
 
-	            res.on('end', d => {
-					// console.log(responses);
-					resolve(responses);
-				})
-	        });
+    Object.assign(opts, changes)
 
-			request.on('error', error => {
-				reject(error);
-			});
+    let mappedOpts = {}
 
-			request.end();
-		});
-	},
+    for (let key in lookupOpts) {
+      let currOpt = lookupOpts[key],
+        value = currOpt[1][opts[currOpt[0]]]
 
-	mapConfig(changes) {
+      if (value !== undefined) {
+        mappedOpts[key] = value
+      }
+    }
 
-		let lookupOpts = {
-			"DefaultDithering": ["dither", { bayer: "bayer", none: "none", "floyd-steinberg": "floyd-steinberg" }],
-			"DefaultEncoding": ["bit", { 1: "1", 4: "4" }],
-			"RectangleFlags": ["invert", { false: "2", true: "0" }],
-			"Beautify": ["optimize", { false: "gamma=1.1", true: "pretty,gamma=1.1" }],
-			"ChangesAutodetect": ["partial", { false: "false,threshold=0", true: "true,threshold=0" }]
-		}
+    let data = [
+      {
+        Uuid: CONF.uuid,
+        Backend: { Name: 'HTTP', Fields: {} },
+        Options: mappedOpts,
+      },
+    ]
 
-		let opts = { dither: "bayer", bit: 1, invert: false, optimize: false, partial: false };
-
-		Object.assign(opts, changes);
-
-		let mappedOpts = {};
-
-		for (let key in lookupOpts) {
-			let currOpt = lookupOpts[key],
-			value = currOpt[1][opts[currOpt[0]]];
-
-			if (value !== undefined) {
-				mappedOpts[key] = value;
-			}
-		}
-
-		let data = [{ "Uuid": CONF.uuid, "Backend": { "Name": "HTTP", "Fields": {} }, "Options": mappedOpts }];
-
-		return JSON.stringify(data);
-	}
-
-
-
+    return JSON.stringify(data)
+  },
 }
 
 const CLIENTS = {
-	//variables
-	list: new Map(),
-	currClient: undefined,
+  //variables
+  list: new Map(),
+  currClient: undefined,
 
-	
-	//do calls
-	actions: {
-		"capture": async function(client, { dataURI, options }) {
+  //do calls
+  actions: {
+    capture: async function (client, { dataURI, options }) {
+      if (!this.isCurrClient(client)) return
 
-			if (!this.isCurrClient(client))
-				return;
+      console.log(`Capture from "${client.id}" received.`)
 
-			console.log(`Capture from "${client.id}" received.`);
+      if (!isOffline()) {
+        await SESSION.setConfig(options).catch((e) =>
+          console.error('Set session config failed.')
+        )
+        await DEVICE.setConfig(options).catch((e) => console.error(e))
+        await DEVICE.sendImage(dataURI).catch((error) =>
+          console.error('SendImage failed.')
+        )
+        console.log('Image sent.')
+        await DEVICE.liveViewUpdated()
+      } else {
+        await UTILS.delay(1000)
+      }
 
-			if(!isOffline()) {
-				await SESSION.setConfig(options).catch(e => console.error("Set session config failed."));
-				await DEVICE.setConfig(options).catch(e => console.error(e));
-				await DEVICE.sendImage(dataURI).catch(error => console.error("SendImage failed."));
-				console.log('Image sent.');
-				await DEVICE.liveViewUpdated();
-			} else {
-				await UTILS.delay(1000);
-			}
+      if (!this.isCurrClient(client)) return
 
-			if (!this.isCurrClient(client))
-				return;
+      UTILS.sendMessage(client, 'resume')
+      UTILS.sendMessage(ADMIN, 'clientSending', client.id)
+    },
+  },
+
+  //methods
+
+  disconnectAll() {
+    for (let [id, client] of this.list) {
+      client.socket.close()
+    }
+
+    this.currClient = undefined
+    this.list.clear()
+
+    console.log('All clients disconnected.')
+  },
+
+  select(id) {
+    if (id && this.list.has(id)) {
+      let oldClient = this.currClient
+
+      this.currClient = this.list.get(id)
+
+      if (oldClient && oldClient === this.currClient) return
+
+      if (!this.currClient) {
+        this.currClient = oldClient
+        return
+      }
+
+      if (!this.currClient === undefined) return
+
+      console.log(`Client "${id} selected."`)
+
+      if (oldClient) {
+        UTILS.sendMessage(oldClient, 'pause')
+      }
 
-			UTILS.sendMessage(client, 'resume');
-			UTILS.sendMessage(ADMIN, 'clientSending', client.id);
+      UTILS.sendMessage(ADMIN, 'confirmSelection', id)
+      UTILS.sendMessage(this.currClient, 'start')
 
-		},
-	},
+      // configureInk(CURRCLIENT);
+    }
+  },
 
-	//methods
+  cycle() {
+    console.log('Cycling...')
 
-	disconnectAll() {
-		for (let [id, client] of this.list) {
-			client.socket.close();
-		}
+    if (this.list.size === 0) return
 
-		this.currClient = undefined;
-		this.list.clear();
+    let clientKey
 
-		console.log('All clients disconnected.');
-	},
+    if (!this.currClient) {
+      clientKey = this.list.keys().next().value
+    } else {
+      let keys = Array.from(this.list.keys())
+      let currIndex = keys.indexOf(this.currClient.id)
+      let nextIndex = (currIndex + 1) % keys.length
 
-	select(id) {
+      clientKey = keys[nextIndex]
+    }
 
-		if (id && this.list.has(id)) {
+    let selectedClient = this.list.get(clientKey)
 
-			let oldClient = this.currClient;
+    this.select(selectedClient.id)
+  },
 
-			this.currClient = this.list.get(id);
-
-			if(oldClient && oldClient === this.currClient)
-				return;
-
-			if(!this.currClient) {
-				this.currClient = oldClient;
-				return;
-			}
-
-			if(!this.currClient === undefined)
-				return;
-
-			console.log(`Client "${id} selected."`);
-
-			if(oldClient) {
-				UTILS.sendMessage(oldClient, 'pause');
-			}
-
-			UTILS.sendMessage(ADMIN, 'confirmSelection', id);
-			UTILS.sendMessage(this.currClient, 'start');
-
-			// configureInk(CURRCLIENT);
-		}
-	},
-
-	cycle() {
-
-		console.log('Cycling...');
-
-		if(this.list.size === 0)
-			return;
-
-		let clientKey;
-
-		if(!this.currClient) {
-
-			clientKey = this.list.keys().next().value;
-
-		} else {
-
-			let keys = Array.from(this.list.keys());
-			let currIndex = keys.indexOf(this.currClient.id);
-			let nextIndex = (currIndex + 1) % keys.length;
-
-			clientKey = keys[nextIndex];
-
-		}
-
-		let selectedClient = this.list.get(clientKey);
-
-		this.select(selectedClient.id);
-	},
-
-	pauseClient(client) {
-
-		if(client) {
-			UTILS.sendMessage(client, 'pause');
-			this.resetIfCurr(client);
-		}
-
-	},
-
-	isCurrClient(client) {
-		if (this.currClient===undefined || client.id !== this.currClient.id) {
-			return false;
-		} else {
-			return true;
-		}
-	},
-
-	resetIfCurr(client) {
-		if(this.currClient === client)
-			this.currClient = undefined;
-	},
-
-	generateId(receivedName) {
-
-		let i = 1;
-		let currId = receivedName || Date.now().toString();
-
-		while (this.list.has(currId)) {
-			i++;
-			currId = receivedName + ' ' + i;
-		}
-
-		return currId;
-
-	},
-
-	do(action, client, data) {
-		if(action in this.actions) {
-			this.actions[action].call(this, client, data);
-		} else {
-
-			console.log(action);
-
-			console.log(`CLIENTS.actions ["${action}] is not defined"`);
-		}
-	},
-
-	simplifyClientObject(client) {
-		return UTILS.ignoreKeys(client, ["socket"]);
-	},
-
-	addClient(socket, req) {
-
-		const client = {
-			id: undefined,
-			socket: socket,
-		};
-
-		let rawParams = Buffer.from(req.url.replace('/?', ''), 'base64').toString('ascii'); //decode base64 to JSON
-		Object.assign(client, JSON.parse(rawParams));
-
-		client.id = this.generateId(client.id);
-
-		this.list.set(client.id, client);
-
-		UTILS.sendMessage(ADMIN, 'clientConnected', this.simplifyClientObject(client));
-
-		console.log(client.id + ' connected.');
-
-		this.autoConnection();
-
-		socket.on('message', string => {
-			let msg = JSON.parse(string);
-			this.do(msg.type, client, msg.data);
-		});
-
-		socket.on('close', msg => {
-
-			console.log(client.id + ' disconnected.');
-			this.list.delete(client.id);
-
-			this.resetIfCurr(client);
-
-			this.autoConnection();
-
-			UTILS.sendMessage(ADMIN, 'clientDisconnected', client.id);			
-		});
-	},
-
-	autoConnection() { //auto connect if one client remaining
-		if(this.list.size === 1 && CONF.autoConnect)
-			this.cycle();
-
-	},
+  pauseClient(client) {
+    if (client) {
+      UTILS.sendMessage(client, 'pause')
+      this.resetIfCurr(client)
+    }
+  },
+
+  isCurrClient(client) {
+    if (this.currClient === undefined || client.id !== this.currClient.id) {
+      return false
+    } else {
+      return true
+    }
+  },
+
+  resetIfCurr(client) {
+    if (this.currClient === client) this.currClient = undefined
+  },
+
+  generateId(receivedName) {
+    let i = 1
+    let currId = receivedName || Date.now().toString()
+
+    while (this.list.has(currId)) {
+      i++
+      currId = receivedName + ' ' + i
+    }
+
+    return currId
+  },
+
+  do(action, client, data) {
+    if (action in this.actions) {
+      this.actions[action].call(this, client, data)
+    } else {
+      console.log(action)
+
+      console.log(`CLIENTS.actions ["${action}] is not defined"`)
+    }
+  },
+
+  simplifyClientObject(client) {
+    return UTILS.ignoreKeys(client, ['socket'])
+  },
+
+  addClient(socket, req) {
+    const client = {
+      id: undefined,
+      socket: socket,
+    }
+
+    let rawParams = Buffer.from(req.url.replace('/?', ''), 'base64').toString(
+      'ascii'
+    ) //decode base64 to JSON
+    Object.assign(client, JSON.parse(rawParams))
+
+    client.id = this.generateId(client.id)
+
+    this.list.set(client.id, client)
+
+    UTILS.sendMessage(
+      ADMIN,
+      'clientConnected',
+      this.simplifyClientObject(client)
+    )
+
+    console.log(client.id + ' connected.')
+
+    this.autoConnection()
+
+    socket.on('message', (string) => {
+      let msg = JSON.parse(string)
+      this.do(msg.type, client, msg.data)
+    })
+
+    socket.on('close', (msg) => {
+      console.log(client.id + ' disconnected.')
+      this.list.delete(client.id)
+
+      this.resetIfCurr(client)
+
+      this.autoConnection()
+
+      UTILS.sendMessage(ADMIN, 'clientDisconnected', client.id)
+    })
+  },
+
+  autoConnection() {
+    //auto connect if one client remaining
+    if (this.list.size === 1 && CONF.autoConnect) this.cycle()
+  },
 }
 
 const UTILS = {
+  floorRemainder(n, m) {
+    let r = n % m //remaider
+    return n - r
+  },
 
-	floorRemainder(n, m) {
-		let r = n%m; //remaider
-		return n-r;
-	},
+  parseString(str = '') {
+    let parsed
 
-	parseString(str = "") {
+    str = str.toString()
 
-		let parsed;
+    try {
+      parsed = JSON.parse(str)
+    } catch (e) {
+      parsed = str
+    }
 
-		str = str.toString();
+    return parsed
+  },
 
-		try {
-			parsed = JSON.parse(str);	
-		} catch(e) {
-			parsed = str;
-		}
+  isSameObject(a, b) {
+    return JSON.stringify(a) === JSON.stringify(b) ? true : false
+  },
 
-		return parsed;
-	},
+  getOrSetJSON(path, defaultObj) {
+    let created = false
+    let same = false
+    let file
+    let strObj = JSON.stringify(defaultObj)
 
-	isSameObject(a, b) {
-		return (JSON.stringify(a) === JSON.stringify(b)) ? true : false;
-	},
+    try {
+      file = FS.readFileSync(path, 'utf8')
+    } catch (e) {
+      FS.writeFileSync(path, strObj)
+      created = true
+      file = strObj
+    }
 
-	getOrSetJSON(path, defaultObj) {
-		let created = false;
-		let same = false;
-		let file;
-		let strObj = JSON.stringify(defaultObj);
+    if (file === strObj) {
+      same = true
+      file = defaultObj
+    } else {
+      file = JSON.parse(file)
+    }
 
-		try {
+    return { data: file, created: created, same: same }
+  },
 
-			file = FS.readFileSync(path, 'utf8');
+  ignoreKeys(obj, keys) {
+    let newObj = {}
 
-		} catch(e) {
+    for (let key in obj) {
+      if (keys.indexOf(key) === -1) newObj[key] = obj[key]
+    }
 
-			FS.writeFileSync(path, strObj);
-			created = true;
-			file = strObj;
+    return newObj
+  },
 
-		}
+  sendMessage(receiver, type, data = null) {
+    if (!receiver.socket) return
 
-		if(file === strObj) {
-			same = true;
-			file = defaultObj;
-		} else {
-			file = JSON.parse(file);
-		}
-		
-		return {data: file, created: created, same: same};
-	},
+    receiver.socket.send(JSON.stringify({ type: type, data: data }))
+  },
 
-	ignoreKeys(obj, keys) {
-		let newObj = {};
-
-		for (let key in obj) {
-			if ( keys.indexOf(key) === -1 ) newObj[key] = obj[key];
-		}
-
-		return newObj;
-	},
-
-	sendMessage(receiver, type, data = null) {
-
-		if (!receiver.socket)
-			return;
-
-		receiver.socket.send(JSON.stringify({ type: type, data: data }));
-	},
-
-	delay(millis = 0) {
-		return new Promise(res => {
-			setTimeout(res, millis);
-		});
-	},
+  delay(millis = 0) {
+    return new Promise((res) => {
+      setTimeout(res, millis)
+    })
+  },
 }
 
 function createServer() {
+  const guiPath = 'gui/index.html'
 
-	const guiPath = 'gui/index.html';
+  SERVER = HTTP.createServer(function (req, res) {
+    FS.readFile(guiPath, function (err, data) {
+      res.writeHead(200, {
+        'Content-Type': 'text/html',
+        'Content-Length': data.length,
+      })
+      res.write(data)
+      res.end()
+    })
+  })
 
-	SERVER = HTTP.createServer(function(req, res) {
-		FS.readFile(guiPath, function(err, data) {
-			res.writeHead(200, { 'Content-Type': 'text/html', 'Content-Length': data.length });
-			res.write(data);
-			res.end();
-		});
-	});
+  SERVER.listen(CONF.port, '0.0.0.0')
 
-	SERVER.listen(CONF.port, "0.0.0.0");
-
-	console.log(`Server running on "${getIPAddress()}:${CONF.port}"`);
-
-	
+  console.log(`Server running on "${getIPAddress()}:${CONF.port}"`)
 }
 
 function createSocket() {
-	WS = new WEBSOCKET.Server({ server: SERVER, keepAlive: true });
+  WS = new WEBSOCKET.Server({ server: SERVER, keepAlive: true })
 
-	WS.on('connection', (socket, req) => {
-		if (req.url.endsWith("/server/?admin")) {
-			ADMIN.setup(socket, req);
-		} else {
-			CLIENTS.addClient(socket, req);
-		}
-	});
+  WS.on('connection', (socket, req) => {
+    if (req.url.endsWith('/server/?admin')) {
+      ADMIN.setup(socket, req)
+    } else {
+      CLIENTS.addClient(socket, req)
+    }
+  })
 }
 
 function getIPAddress() {
+  const interfaces = OS.networkInterfaces()
 
-	const interfaces = OS.networkInterfaces();
+  for (const devName in interfaces) {
+    const iface = interfaces[devName]
 
-	for (const devName in interfaces) {
+    for (let i = 0; i < iface.length; i++) {
+      const alias = iface[i]
+      if (
+        alias.family === 'IPv4' &&
+        alias.address !== '127.0.0.1' &&
+        !alias.internal
+      )
+        return alias.address
+    }
+  }
 
-		const iface = interfaces[devName];
-
-		for (let i = 0; i < iface.length; i++) {
-			const alias = iface[i];
-			if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal)
-				return alias.address;
-		}
-	}
-
-	return '0.0.0.0';
+  return '0.0.0.0'
 }
 
 function getProcessArguments() {
+  const opts = {}
+  let register = null
 
-	const opts = {};
-	let register = null;
+  for (let j = 0; j < process.argv.length; j++) {
+    let currArg = process.argv[j]
 
-	for (let j = 0; j < process.argv.length; j++) {
+    if (register !== null) {
+      opts[register] = UTILS.parseString(currArg)
+      register = null
+    } else {
+      if (currArg.charAt(0) === '-') register = currArg.slice(1)
+    }
+  }
 
-		let currArg = process.argv[j];
-
-		if(register !== null) {
-
-			opts[register] = UTILS.parseString(currArg);
-			register = null;
-
-		} else {
-
-			if( currArg.charAt( 0 ) === '-' )
-				register = currArg.slice( 1 );
-		}
-	}
-
-	return Object.entries(opts).length > 0 ? opts: null;
+  return Object.entries(opts).length > 0 ? opts : null
 }
 
 function getConfig() {
+  let newArgs = getProcessArguments()
 
-	let newArgs = getProcessArguments();
+  let pathConfig = 'config.json'
 
-	let pathConfig = 'config.json';
+  let { data: savedOpts } = UTILS.getOrSetJSON(pathConfig, CONF)
 
-	let {data: savedOpts} = UTILS.getOrSetJSON(pathConfig, CONF);
+  let mergedArgs = Object.assign({}, savedOpts, newArgs)
 
-	let mergedArgs = Object.assign({}, savedOpts, newArgs);
+  if (!UTILS.isSameObject(mergedArgs, savedOpts)) {
+    FS.writeFileSync(pathConfig, JSON.stringify(mergedArgs))
+    console.log(`"${pathConfig}" rewritten.`)
+  }
 
-	if(!UTILS.isSameObject(mergedArgs, savedOpts)) {
-		
-		FS.writeFileSync(pathConfig, JSON.stringify(mergedArgs));
-		console.log(`"${pathConfig}" rewritten.`);
-		
-	}
-
-	Object.assign(CONF, mergedArgs);
-
+  Object.assign(CONF, mergedArgs)
 }
 
 function isOffline() {
-	return CONF.offline;
+  return CONF.offline
 }
 
 async function init() {
+  getConfig()
+  console.log('Current server configuration: ')
+  console.log(CONF)
 
-	getConfig();
-	console.log('Current server configuration: ');
-	console.log(CONF);
+  if (!CONF.offline) {
+    await SESSION.retrieveConfig()
+    await DEVICE.retrieveConfig()
+    await DEVICE.retrieveLiveView()
+  } else {
+    console.log('Running in offline mode, connection to e-paper disabled.')
+  }
 
-	if(!CONF.offline) {
+  // DEVICE.liveView = await DEVICE.getLiveView();
+  // await loopLiveView();
 
-		await SESSION.retrieveConfig();
-		await DEVICE.retrieveConfig();
-		await DEVICE.retrieveLiveView();
+  // let image2 = await DEVICE.getLiveView();
+  // let strRes = responses.map(raw => raw.toString('binary'));
 
-	} else {
-		console.log('Running in offline mode, connection to e-paper disabled.');
-	}
+  // console.log(strRes.join(''));
 
-	// DEVICE.liveView = await DEVICE.getLiveView();
-	// await loopLiveView();
-	
-	// let image2 = await DEVICE.getLiveView();
-	// let strRes = responses.map(raw => raw.toString('binary'));
+  // FS.writeFile('test.jpg', buffer, 'binary');
+  // console.log(SESSION.config);
+  // console.log(DEVICE.config);
 
-	// console.log(strRes.join(''));
-	
-	// FS.writeFile('test.jpg', buffer, 'binary');
-	// console.log(SESSION.config);
-	// console.log(DEVICE.config);
+  createServer()
+  createSocket()
 
-	createServer();
-	createSocket();
-
-	if(CONF.showreel) {
-
-		SHOWREEL.init({
-			delay: CONF.showreel
-		});
-
-	}
+  if (CONF.showreel) {
+    SHOWREEL.init({
+      delay: CONF.showreel,
+    })
+  }
 }
 
-init();
+init()
