@@ -18,7 +18,7 @@ function setup() {
     pixelDensity(1);
     frameRate(1);
     background(0);
-
+    
     repeatDraw(1000) // Will repeat 1000 times, PLEASE ADD BEFORE INK.CONNECT & AFTER CREATECANVAS!
 
     // Ink.connect({ id: 'Ball Repeat Draw Example', record: true, options: inkOptions }); //connect to eInk via a server to display image
@@ -34,6 +34,7 @@ function repeatDraw(repetitions = 100) { // default repetitions set to 100 times
         draw()
         pop()
         repetitions--;
+        frameCount++;
     }
 
     loop()
