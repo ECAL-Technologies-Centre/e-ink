@@ -202,7 +202,7 @@ Clock.display({
 4. You should be connected to the Visionect Server. One device should be online.
 
 ### Still having WTF issues.
-Ask Sébatien Matos or Tibor Udvari for additionnal help.
+Ask Sébatien Matos for additionnal help.
 
 
 ----
