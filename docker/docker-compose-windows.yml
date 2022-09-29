@@ -1,11 +1,14 @@
 version: "3"
 services:
   vserver3:
-    container_name: vss-master
-    image: visionect/visionect-server-v3-armhf:latest
+    container_name: vss
+    image: visionect/visionect-server-v3
     privileged: true
+    ulimits:
+      core: 0
     depends_on:
       - redis
+      - postgres_db
     cap_add:
       - MKNOD
       - SYS_ADMIN
@@ -23,14 +26,9 @@ services:
       - DB2_1_PORT_5432_TCP_USER=visionect
       - DB2_1_PORT_5432_TCP_PASS=visionect
       - DB2_1_PORT_5432_TCP_DB=koala
-      - VISIONECT_SERVER_MASTER_HOST
-      - VISIONECT_SERVER_DEPLOYMENT_KEY
-      - VISIONECT_SERVER_CERTIFICATES=/usr/local/share/ca-certificates
       - REDIS_ADDRESS=redis:6379
     volumes:
       - /dev/shm:/dev/shm
-      - ./certs:/usr/local/share/ca-certificates
-      - ./app:/app
   postgres_db:
     container_name: pdb
     image: postgres:latest

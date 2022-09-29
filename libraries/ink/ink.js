@@ -4,7 +4,7 @@ console.log('Running Ink.js v0.4.5')
 const Ink = {
   //server
   id: 'anonymous', //default id/name
-  host: 'localhost',
+  host: '10.192.148.214',
   port: 3600,
 
   clear: true, //Remove ghosting of previous client.
