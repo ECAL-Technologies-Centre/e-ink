@@ -219,6 +219,8 @@ const Clock = (function () {
           context: window.drawingContext,
           scale: 2,
         };
+        
+        if(o.context instanceof WebGLRenderingContext) return;
 
         Object.assign(o, options);
 
